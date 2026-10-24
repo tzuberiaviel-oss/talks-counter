@@ -188,6 +188,12 @@
     background: var(--tip-bg); color: var(--ink); border: 1px solid var(--hair); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
     padding: 11px 18px; border-radius: 999px; z-index: 30; font-size: 15px; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0,0,0,.5); }
   .action-bar { margin-bottom: 14px; }
+  .who-btn { font-size: 14px; }
+  .who-btn.in { background: transparent; border-color: transparent; color: var(--muted); font-size: 13px; }
+  .who-btn.in:hover { color: var(--ink); background: var(--glass); }
+  .view-only { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 16px;
+    padding: 10px 12px 10px 10px; border-radius: 14px; background: var(--orange-soft); border: 1px solid rgba(255,102,0,.3); color: #ffc9a3; font-size: 14px; }
+  .view-only button { padding: 6px 14px; font-size: 14px; }
   /* Phones: compact header, packages as a swipeable row, the main button pinned near the thumb,
      forms as bottom sheets, and no blur effects (they slow phones down) */
   @media (max-width: 780px) {
@@ -204,7 +210,7 @@
     .pkg-list::-webkit-scrollbar { display: none; }
     .pkg { flex: 0 0 auto; width: auto; min-width: 150px; max-width: 78%; scroll-snap-align: start; background: var(--glass); border-color: var(--hair); }
     .pkg.active { background: var(--glass-strong); border-color: rgba(255,102,0,.45); }
-    #whoBtn { grid-column: 1 / -1; font-size: 13px; }
+    #whoBtn { grid-column: 1 / -1; }
     .panel, .bubble, .toast, .overlay { -webkit-backdrop-filter: none; backdrop-filter: none; }
     main.panel { padding: 18px 16px 4px; border-radius: 22px; background: rgba(28,28,30,.72); }
     h1 { font-size: 25px; }
@@ -212,7 +218,7 @@
     .stats { gap: 8px; margin: 18px 0 14px; }
     .stat { padding: 12px 4px 10px; border-radius: 14px; }
     .stat b { font-size: 36px; }
-    .dots { gap: 5px; grid-template-columns: repeat(10, minmax(0, 1fr)); margin: 16px 0 8px; }
+    .dots { gap: 5px; grid-template-columns: repeat(10, minmax(0, 1fr)); margin: 16px 0 8px; max-width: 460px; }
     .dot { border-radius: 8px; font-size: 10.5px; }
     .action-bar { position: sticky; bottom: 0; z-index: 4; flex-wrap: nowrap; margin: 0 -16px 8px;
       padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
@@ -242,13 +248,13 @@
         <span class="status" id="status">מתחבר...</span>
       </div>
     </div>
+    <button class="who-btn" id="whoBtn" hidden></button>
     <button class="primary" id="newPkgBtn" hidden>+ חבילה חדשה</button>
     <button id="calBtn"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>לוח חודשי</button>
     <div class="panel">
       <h2>חבילות</h2>
       <div class="pkg-list" id="pkgList"><div class="small">טוען חבילות...</div></div>
     </div>
-    <button class="ghost" id="whoBtn" hidden></button>
   </aside>
   <main class="panel" id="main">
     <div class="empty">טוען את הנתונים...</div>
@@ -266,6 +272,7 @@ const POLL_MS = 15000;
 const I = {
   cal: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
   check: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  lock: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 017 0v2.5"/></svg>',
   undo: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg>'
 };
 const token = decodeURIComponent(location.hash.slice(1));
@@ -377,8 +384,9 @@ async function write(fn, args, okText) {
 function renderWho() {
   const b = $('whoBtn'), pin = store.get('pin');
   b.hidden = !loaded;
-  b.textContent = !pin ? 'כניסה עם קוד'
-    : `${isAdmin() ? 'מחובר כמנהל' : 'מחובר לעריכה'}${store.get('who') ? ' · ' + store.get('who') : ''} · יציאה`;
+  b.classList.toggle('in', !!pin);
+  b.innerHTML = !pin ? `${I.lock}כניסה עם קוד`
+    : esc(`${isAdmin() ? 'מחובר כמנהל' : 'מחובר לעריכה'}${store.get('who') ? ' · ' + store.get('who') : ''} · יציאה`);
 }
 $('whoBtn').onclick = () => {
   if (!store.get('pin')) return askPin(false);
@@ -445,6 +453,8 @@ function render() {
       ${isAdmin() ? `<div class="row head-actions"><button onclick="openPkg('${esc(p.id)}')">עריכת חבילה</button>
         <button class="ghost danger" onclick="delPkg()">מחיקה</button></div>` : ''}
     </div>
+    ${store.get('pin') ? '' : `<div class="view-only"><span>מצב צפייה. כדי לסמן פרקים צריך קוד.</span>
+      <button onclick="askPin(false)">${I.lock}הקלדת קוד</button></div>`}
     <div class="stats">
       <div class="stat done"><b>${done}</b><span>נגמרו</span></div>
       <div class="stat"><b>${left}</b><span>נשארו</span></div>
