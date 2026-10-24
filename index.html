@@ -187,6 +187,48 @@
   .toast { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
     background: var(--tip-bg); color: var(--ink); border: 1px solid var(--hair); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
     padding: 11px 18px; border-radius: 999px; z-index: 30; font-size: 15px; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+  .action-bar { margin-bottom: 14px; }
+  /* Phones: compact header, packages as a swipeable row, the main button pinned near the thumb,
+     forms as bottom sheets, and no blur effects (they slow phones down) */
+  @media (max-width: 780px) {
+    .wrap { gap: 14px; padding-block: 14px 24px; }
+    .side { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .brand { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; padding: 0 2px; }
+    .brand img { width: 92px; }
+    .brand-row { gap: 8px; flex-wrap: nowrap; }
+    #newPkgBtn, #calBtn { padding: 10px 12px; font-size: 14px; }
+    #newPkgBtn[hidden] + #calBtn { grid-column: 1 / -1; }
+    .side .panel { grid-column: 1 / -1; padding: 0; background: none; border: 0; }
+    .side .panel h2 { display: none; }
+    .pkg-list { flex-direction: row; overflow-x: auto; scroll-snap-type: x mandatory; gap: 8px; scrollbar-width: none; }
+    .pkg-list::-webkit-scrollbar { display: none; }
+    .pkg { flex: 0 0 auto; width: auto; min-width: 150px; max-width: 78%; scroll-snap-align: start; background: var(--glass); border-color: var(--hair); }
+    .pkg.active { background: var(--glass-strong); border-color: rgba(255,102,0,.45); }
+    #whoBtn { grid-column: 1 / -1; font-size: 13px; }
+    .panel, .bubble, .toast, .overlay { -webkit-backdrop-filter: none; backdrop-filter: none; }
+    main.panel { padding: 18px 16px 4px; border-radius: 22px; background: rgba(28,28,30,.72); }
+    h1 { font-size: 25px; }
+    .head-actions button { padding: 6px 12px; font-size: 14px; }
+    .stats { gap: 8px; margin: 18px 0 14px; }
+    .stat { padding: 12px 4px 10px; border-radius: 14px; }
+    .stat b { font-size: 36px; }
+    .dots { gap: 5px; grid-template-columns: repeat(10, minmax(0, 1fr)); margin: 16px 0 8px; }
+    .dot { border-radius: 8px; font-size: 10.5px; }
+    .action-bar { position: sticky; bottom: 0; z-index: 4; flex-wrap: nowrap; margin: 0 -16px 8px;
+      padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+      background: linear-gradient(to top, rgba(22,22,24,.98) 65%, rgba(22,22,24,0)); }
+    .action-bar .primary { flex: 1; }
+    .eps li { grid-template-columns: 30px minmax(0, 1fr); gap: 2px 10px; padding: 12px 0; }
+    .eps .n { font-size: 18px; }
+    .ep-actions { grid-column: 2; gap: 0; margin-inline-start: -10px; }
+    .ep-actions .ghost, .ep-actions .cal-link { font-size: 13px; padding: 6px 10px; }
+    .overlay { place-items: end center; padding: 0; }
+    .modal { width: 100%; max-height: 92vh; border-radius: 22px 22px 0 0; border-bottom: 0;
+      padding: 22px 18px calc(18px + env(safe-area-inset-bottom, 0px)); }
+    .actions .primary { flex: 1; }
+    .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+    .day-detail { padding-bottom: 18px; }
+  }
   @media (prefers-reduced-motion: reduce) { .tip.glide, .tbody, .bar > i, button { transition: none; } }
 </style>
 </head>
@@ -375,7 +417,7 @@ function render() {
         <div class="meta">${e.guest && e.title ? 'עם ' + esc(e.guest) + ' · ' : ''}${fmtDate(e.date)}${e.by ? ' · סימן: ' + esc(e.by) : ''}</div>
         ${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}
       </div>
-      <div class="row">
+      <div class="row ep-actions">
         <a class="cal-link" href="${calUrl(p, e, n)}" target="_blank" rel="noopener">${I.cal}הוסף ליומן</a>
         <button class="ghost" onclick="openEp('${esc(e.id)}')">עריכה</button>
         <button class="ghost danger" onclick="delEp('${esc(e.id)}')">מחיקה</button>
@@ -388,7 +430,7 @@ function render() {
         <div class="small">חבילה של ${p.total} פרקים${p.note ? ' · ' + esc(p.note) : ''}</div>
         ${p.guests.length ? `<div class="small">מוזמנים: <span dir="ltr">${p.guests.map(esc).join(', ')}</span></div>` : ''}
       </div>
-      <div class="row"><button onclick="openPkg('${esc(p.id)}')">עריכת חבילה</button>
+      <div class="row head-actions"><button onclick="openPkg('${esc(p.id)}')">עריכת חבילה</button>
         <button class="ghost danger" onclick="delPkg()">מחיקה</button></div>
     </div>
     <div class="stats">
@@ -399,7 +441,7 @@ function render() {
     <div class="bar"><i style="width:${pct(p)}%"></i></div>
     <div class="dots" id="dots">${dots}</div>
     ${done >= p.total ? `<div class="complete">${I.check}החבילה הושלמה!</div>` : ''}
-    <div class="row" style="margin-bottom:14px">
+    <div class="row action-bar">
       <button class="primary big" onclick="openEp()">${I.check}סיימתי פרק</button>
       <button onclick="undoLast()" ${done ? '' : 'disabled'}>${I.undo}ביטול אחרון</button></div>
     <h2>פרקים שנגמרו</h2>
