@@ -288,6 +288,11 @@ const epsOf = id => episodes.filter(e => e.pkg === id).sort((a, b) => (a.date ||
 const pct = p => p.total ? Math.min(100, Math.round(epsOf(p.id).length / p.total * 100)) : 0;
 const epName = (e, n) => e.title || (e.guest ? 'פרק עם ' + e.guest : 'פרק ' + n);
 function select(id) { selectedId = id; store.set('selected', id); }
+const isAdmin = () => !!store.get('pin') && store.get('role') === 'admin';
+// Non-admins may change or undo an episode only within 10 minutes of marking it (the server enforces this too)
+const UNDO_MS = 10 * 60 * 1000;
+const recent = e => e && e.at && Date.now() - Date.parse(e.at) < UNDO_MS;
+const canChange = e => isAdmin() || recent(e);
 
 function toast(text) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = text;
@@ -343,7 +348,7 @@ function askPin(again) {
       const pin = ev.target.pin.value.trim(), who = ev.target.who.value.trim();
       let res;
       try { res = await rpc('pc_check_pin', { p_token: token, p_pin: pin }); } catch (e) { res = { ok: false, error: e.code }; }
-      if (res.ok) { store.set('pin', pin); store.set('who', who || null); closeModal(); renderWho(); resolve(pin); return; }
+      if (res.ok) { store.set('pin', pin); store.set('role', res.role || 'editor'); store.set('who', who || null); closeModal(); renderWho(); render(); resolve(pin); return; }
       if (res.error === 'locked') { closeModal(); toast('יותר מדי ניסיונות. אפשר לנסות שוב בעוד 15 דקות.'); resolve(null); return; }
       if (res.error === 'bad_pin') { closeModal(); resolve(await askPin(true)); return; }
       closeModal(); toast('אין חיבור כרגע. נסה שוב.'); resolve(null);
@@ -359,9 +364,11 @@ async function write(fn, args, okText) {
   let res;
   try { res = await rpc(fn, { p_token: token, p_pin: pin, ...args }); } catch (e) { res = { ok: false, error: e.code }; }
   if (res.ok) { if (okText) toast(okText); await load(); return true; }
-  if (res.error === 'bad_pin') { store.set('pin', null); const again = await askPin(true); if (again) return write(fn, args, okText); return false; }
+  if (res.error === 'bad_pin') { store.set('pin', null); store.set('role', null); const again = await askPin(true); if (again) return write(fn, args, okText); return false; }
   if (res.error === 'locked') toast('יותר מדי ניסיונות. אפשר לנסות שוב בעוד 15 דקות.');
   else if (res.error === 'not_found') { toast('הפריט כבר נמחק על ידי מישהו אחר.'); await load(); }
+  else if (res.error === 'admin_only') toast('רק המנהל יכול לעשות את זה.');
+  else if (res.error === 'too_late') { toast('עברו יותר מ-10 דקות. רק המנהל יכול לשנות את הפרק הזה.'); render(); }
   else toast('השמירה לא הצליחה. בדוק את החיבור ונסה שוב.');
   return false;
 }
@@ -369,13 +376,18 @@ async function write(fn, args, okText) {
 // ---------- rendering ----------
 function renderWho() {
   const b = $('whoBtn'), pin = store.get('pin');
-  b.hidden = !pin;
-  b.textContent = pin ? `מחובר לעריכה${store.get('who') ? ' כ' + store.get('who') : ''} · יציאה` : '';
+  b.hidden = !loaded;
+  b.textContent = !pin ? 'כניסה עם קוד'
+    : `${isAdmin() ? 'מחובר כמנהל' : 'מחובר לעריכה'}${store.get('who') ? ' · ' + store.get('who') : ''} · יציאה`;
 }
-$('whoBtn').onclick = () => { store.set('pin', null); renderWho(); toast('יצאת ממצב עריכה במכשיר הזה'); };
+$('whoBtn').onclick = () => {
+  if (!store.get('pin')) return askPin(false);
+  store.set('pin', null); store.set('role', null); renderWho(); render(); toast('יצאת ממצב עריכה במכשיר הזה');
+};
 
 function render() {
-  $('newPkgBtn').hidden = !!linkError || !loaded;
+  $('newPkgBtn').hidden = !!linkError || !loaded || !isAdmin();
+  renderWho();
   $('calBtn').classList.toggle('active', view === 'calendar');
   const st = $('status');
   st.textContent = linkError ? 'קישור לא תקין' : offline ? 'אין חיבור' : loaded ? '● משותף' : 'מתחבר...';
@@ -402,8 +414,8 @@ function render() {
   const p = current();
   if (!p) {
     main.innerHTML = `<div class="empty"><h3>עוד אין חבילות</h3>
-      <div>חבילה היא מספר פרקים שנמכרו ללקוח, למשל 60. כל מי שיש לו את הקישור יראה את הספירה.</div>
-      <button class="primary big" onclick="openPkg()">+ חבילה חדשה</button></div>`;
+      <div>${isAdmin() ? 'חבילה היא מספר פרקים שנמכרו ללקוח, למשל 60. כל מי שיש לו את הקישור יראה את הספירה.' : 'המנהל עוד לא יצר חבילה.'}</div>
+      ${isAdmin() ? '<button class="primary big" onclick="openPkg()">+ חבילה חדשה</button>' : ''}</div>`;
     return;
   }
   const eps = epsOf(p.id), done = eps.length, left = Math.max(0, p.total - done);
@@ -419,8 +431,8 @@ function render() {
       </div>
       <div class="row ep-actions">
         <a class="cal-link" href="${calUrl(p, e, n)}" target="_blank" rel="noopener">${I.cal}הוסף ליומן</a>
-        <button class="ghost" onclick="openEp('${esc(e.id)}')">עריכה</button>
-        <button class="ghost danger" onclick="delEp('${esc(e.id)}')">מחיקה</button>
+        ${canChange(e) ? `<button class="ghost" onclick="openEp('${esc(e.id)}')">עריכה</button>
+        <button class="ghost danger" onclick="delEp('${esc(e.id)}')">מחיקה</button>` : ''}
       </div>
     </li>`).join('');
   main.innerHTML = `
@@ -430,8 +442,8 @@ function render() {
         <div class="small">חבילה של ${p.total} פרקים${p.note ? ' · ' + esc(p.note) : ''}</div>
         ${p.guests.length ? `<div class="small">מוזמנים: <span dir="ltr">${p.guests.map(esc).join(', ')}</span></div>` : ''}
       </div>
-      <div class="row head-actions"><button onclick="openPkg('${esc(p.id)}')">עריכת חבילה</button>
-        <button class="ghost danger" onclick="delPkg()">מחיקה</button></div>
+      ${isAdmin() ? `<div class="row head-actions"><button onclick="openPkg('${esc(p.id)}')">עריכת חבילה</button>
+        <button class="ghost danger" onclick="delPkg()">מחיקה</button></div>` : ''}
     </div>
     <div class="stats">
       <div class="stat done"><b>${done}</b><span>נגמרו</span></div>
@@ -443,7 +455,7 @@ function render() {
     ${done >= p.total ? `<div class="complete">${I.check}החבילה הושלמה!</div>` : ''}
     <div class="row action-bar">
       <button class="primary big" onclick="openEp()">${I.check}סיימתי פרק</button>
-      <button onclick="undoLast()" ${done ? '' : 'disabled'}>${I.undo}ביטול אחרון</button></div>
+      <button onclick="undoLast()" ${canChange(lastMarked(p.id)) ? '' : 'disabled'}>${I.undo}ביטול אחרון</button></div>
     <h2>פרקים שנגמרו</h2>
     ${done ? `<ul class="eps">${list}</ul>` : '<div class="small">עוד לא סומן אף פרק.</div>'}
     <div class="tip" id="tip"><div class="bubble"><div class="tbody"></div></div></div>`;
@@ -578,8 +590,9 @@ function openEp(id) {
       p_date: f.date.value || today(), p_note: f.note.value.trim(), p_by_name: store.get('who') || '' }, e ? 'הפרק עודכן' : 'הפרק נוסף');
   };
 }
+const lastMarked = id => [...epsOf(id)].sort((a, b) => (a.at || '').localeCompare(b.at || '')).pop();
 async function undoLast() {
-  const last = [...epsOf(current().id)].sort((a, b) => (a.at || '').localeCompare(b.at || '')).pop();
+  const last = lastMarked(current().id);
   if (last) await write('pc_delete_episode', { p_id: last.id }, 'הפרק האחרון בוטל');
 }
 async function delEp(id) {
@@ -647,7 +660,11 @@ $('pkgList').addEventListener('click', ev => {
 $('newPkgBtn').onclick = () => openPkg();
 $('calBtn').onclick = () => { view = view === 'calendar' ? 'pkg' : 'calendar'; render(); };
 window.addEventListener('hashchange', () => location.reload());
-renderWho();
+setInterval(() => { if (loaded && !$('modalRoot').innerHTML) render(); }, 60000);
+if (store.get('pin') && !store.get('role') && token) {
+  rpc('pc_check_pin', { p_token: token, p_pin: store.get('pin') })
+    .then(r => { if (r.ok) store.set('role', r.role); else { store.set('pin', null); } render(); }).catch(() => {});
+}
 render();
 load();
 </script>
