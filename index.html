@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#2b2b2f">
+<title>מונה פודקאסטים · talks.</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' fill='%23ff6600'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap">
+<style>
+  /* talks. — one deliberate dark look: graphite fading to black, white type, orange as the single accent.
+     Layout: package rail on the side, the selected package's episode board as the main surface. */
+  :root {
+    --top: #3a3a40; --mid: #18181b; --black: #000000;
+    --glass: rgba(255,255,255,.055); --glass-strong: rgba(255,255,255,.09); --hair: rgba(255,255,255,.1);
+    --ink: #f5f5f7; --muted: #a1a1a6; --faint: #6e6e73;
+    --orange: #ff6600; --orange-hover: #ff7a1f; --orange-soft: rgba(255,102,0,.16); --on-orange: #ffffff;
+    --danger: #ff453a; --tip-bg: rgba(44,44,48,.92);
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Hebrew", "Assistant", "Segoe UI", system-ui, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Hebrew", "Assistant", system-ui, sans-serif;
+    --ease-enter: cubic-bezier(.16,1,.3,1);
+    --ease-standard: cubic-bezier(.22,1,.36,1);
+    --ease-spring: linear(0, 0.0258, 0.09, 0.1763, 0.2732, 0.3724, 0.4683, 0.5573, 0.6376, 0.7082, 0.7689, 0.8202, 0.8628, 0.8976, 0.9256, 0.9476, 0.9648, 0.9778, 0.9875, 0.9945, 0.9994, 1.0026, 1.0047, 1.0058, 1.0062, 1.0062, 1.0059, 1.0055, 1.0049, 1.0043, 1.0036, 1.0031, 1.0025, 1.002, 1.0016, 1.0013, 1);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--black); min-height: 100%; }
+  body { margin: 0; }
+  [hidden] { display: none !important; }
+  img { max-width: 100%; }
+  body { min-height: 100vh; color: var(--ink); font: 16px/1.5 var(--font); -webkit-font-smoothing: antialiased;
+    background: radial-gradient(90% 45% at 50% 0%, rgba(255,255,255,.07), transparent 70%) fixed,
+      linear-gradient(180deg, var(--top) 0%, var(--mid) 42%, var(--black) 100%) fixed, var(--black); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-block: 32px 72px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 24px; direction: rtl; }
+  @media (max-width: 780px) { .wrap { grid-template-columns: minmax(0, 1fr); padding-block: 20px 56px; } }
+  h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; }
+  h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+  h2 { font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: .04em; margin-bottom: 12px; }
+  h3 { font-size: 21px; font-weight: 600; letter-spacing: -.01em; }
+  .small { font-size: 14px; color: var(--muted); }
+  .panel { background: var(--glass); border: 1px solid var(--hair); border-radius: 20px; padding: 20px; min-width: 0;
+    -webkit-backdrop-filter: saturate(160%) blur(24px); backdrop-filter: saturate(160%) blur(24px); }
+  main.panel { padding: 28px; }
+  @media (max-width: 780px) { main.panel { padding: 20px; } }
+  .side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .brand { display: flex; flex-direction: column; gap: 6px; padding: 4px 4px 8px; }
+  .brand img { width: 132px; height: auto; display: block; }
+  .brand-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+  button, .btn { font: inherit; font-size: 15px; font-weight: 500; border: 1px solid var(--hair); background: var(--glass-strong); color: var(--ink);
+    border-radius: 999px; padding: 8px 16px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    transition: background .2s var(--ease-standard), border-color .2s var(--ease-standard), transform .15s var(--ease-standard); }
+  button:hover, .btn:hover { background: rgba(255,255,255,.14); }
+  button:active { transform: scale(.97); }
+  button:focus-visible, .btn:focus-visible, input:focus-visible, textarea:focus-visible, .dot:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+  button.primary { background: var(--orange); border-color: var(--orange); color: var(--on-orange); font-weight: 600; }
+  button.primary:hover { background: var(--orange-hover); border-color: var(--orange-hover); }
+  button.big { font-size: 17px; padding: 13px 26px; }
+  button.ghost { border-color: transparent; background: transparent; color: var(--muted); padding: 4px 10px; }
+  button.ghost:hover { color: var(--ink); background: var(--glass); }
+  button.ghost.danger:hover { color: var(--danger); }
+  button:disabled { opacity: .35; cursor: default; transform: none; }
+  input, textarea { font: inherit; color: var(--ink); background: rgba(0,0,0,.35); border: 1px solid var(--hair); border-radius: 12px; padding: 11px 13px; width: 100%; }
+  input::placeholder, textarea::placeholder { color: var(--faint); }
+  textarea { resize: vertical; min-height: 70px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; font-weight: 600; }
+  .status { font-size: 12px; font-weight: 600; padding: 4px 11px; border-radius: 999px; background: var(--glass-strong); color: var(--muted); }
+  .status.live { background: var(--orange-soft); color: var(--orange); }
+
+  .pkg-list { display: flex; flex-direction: column; gap: 6px; }
+  .pkg { width: 100%; text-align: right; display: block; padding: 12px 14px; border-radius: 14px; background: transparent; border-color: transparent; }
+  .pkg:hover { background: var(--glass); }
+  .pkg.active { background: var(--glass-strong); border-color: var(--hair); }
+  .pkg .nm { font-weight: 600; }
+  .pkg .sub { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .mini-bar { height: 4px; border-radius: 2px; background: rgba(255,255,255,.1); margin-top: 8px; overflow: hidden; }
+  .mini-bar > i { display: block; height: 100%; background: var(--orange); border-radius: 2px; }
+  #calBtn.active { background: var(--orange-soft); border-color: rgba(255,102,0,.4); color: var(--orange); }
+
+  main { position: relative; }
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 26px 0 18px; }
+  .stat { background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.06); border-radius: 18px; padding: 16px 8px 14px; text-align: center; }
+  .stat b { display: block; font-family: var(--font-display); font-weight: 300; font-size: 46px; letter-spacing: -.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .stat.done b { color: var(--orange); font-weight: 500; }
+  .bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .bar > i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #ff8a3d, var(--orange)); transition: width .5s var(--ease-standard); }
+  .dots { display: grid; grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 6px; margin: 20px 0; }
+  .dot { aspect-ratio: 1; max-width: 100%; border-radius: 9px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.07);
+    font-size: 11px; display: grid; place-items: center; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .dot.on { background: var(--orange); border-color: var(--orange); color: var(--on-orange); font-weight: 600; box-shadow: 0 2px 10px rgba(255,102,0,.25); }
+  .complete { background: var(--orange-soft); color: var(--orange); border-radius: 14px; padding: 12px; text-align: center; font-weight: 600; margin-bottom: 14px; }
+  .eps { list-style: none; margin: 0; padding: 0; }
+  .eps li { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 14px 0; border-top: 1px solid rgba(255,255,255,.07); }
+  .eps .n { color: var(--orange); font-family: var(--font-display); font-size: 20px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; line-height: 1.3; }
+  .eps .t { font-weight: 600; }
+  .eps .meta { font-size: 13px; color: var(--muted); }
+  .eps .note { font-size: 14px; color: #d2d2d7; white-space: pre-wrap; margin-top: 3px; overflow-wrap: anywhere; }
+  .cal-link { font-size: 13px; color: var(--orange); text-decoration: none; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .cal-link:hover { background: var(--orange-soft); }
+  .empty { color: var(--muted); text-align: center; padding: 56px 12px; display: grid; gap: 16px; justify-items: center; }
+  .empty h3 { color: var(--ink); }
+
+  /* Hover bubble for finished episodes: opens in place, then glides between cells */
+  .tip { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 5; }
+  .tip.glide { transition: transform 580ms var(--ease-spring); }
+  .bubble { background: var(--tip-bg); color: var(--ink); border: 1px solid var(--hair); border-radius: 14px; padding: 9px 13px;
+    -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,.5);
+    transform: translate(-50%, calc(-100% - 10px)) scale(.96); transform-origin: 50% 100%;
+    opacity: 0; transition: opacity 120ms var(--ease-standard), transform 160ms var(--ease-standard); }
+  .tip.open .bubble { opacity: 1; transform: translate(-50%, calc(-100% - 10px)) scale(1); }
+  .tbody { position: relative; overflow: hidden; transition: width 580ms var(--ease-spring), height 580ms var(--ease-spring); }
+  .tlines { display: flex; flex-direction: column; width: max-content; max-width: 240px; text-align: right; }
+  .tp { font-weight: 600; font-size: 14px; }
+  .ts { font-size: 12px; color: var(--muted); }
+  .tn { font-size: 12px; color: #d2d2d7; white-space: pre-wrap; margin-top: 3px; }
+
+  /* Modal */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); display: grid; place-items: center; z-index: 20;
+    padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+  .modal { background: #1c1c1e; border: 1px solid var(--hair); border-radius: 22px; padding: 24px; width: min(460px, 100%); max-height: 100%; overflow: auto; direction: rtl;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+  .actions { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+  .suggest { background: var(--orange-soft); border: 1px solid rgba(255,102,0,.3); border-radius: 14px; padding: 12px 14px; margin: 12px 0 4px; }
+  .suggest .q { font-weight: 600; margin-bottom: 10px; }
+  .suggest.ok { color: var(--orange); font-weight: 600; }
+  .chip { font-size: 13px; padding: 5px 12px; margin-top: 4px; }
+
+  /* Agenda */
+  .day { margin-top: 22px; }
+  .day h3 { font-size: 15px; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+  .ev { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 14px; border-radius: 14px; background: rgba(255,255,255,.035); }
+  .ev + .ev { margin-top: 6px; }
+  .ev.pod { background: var(--orange-soft); }
+  .ev .tm { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; }
+  .ev.pod .tm { color: var(--orange); }
+  .ev .sm { font-weight: 500; overflow-wrap: anywhere; }
+
+  .ic { width: 1.05em; height: 1.05em; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .complete .ic, .suggest .ic { vertical-align: -.15em; margin-inline-end: 6px; }
+  .cal-link { display: inline-flex; align-items: center; gap: 5px; }
+  /* Month calendar */
+  .cal-head h1 { font-size: 34px; }
+  .icon-btn { width: 38px; height: 38px; padding: 0; }
+  .cal-banner { margin-top: 18px; padding: 10px 14px; border-radius: 12px; background: rgba(255,255,255,.06); color: var(--muted); font-size: 14px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); margin-top: 20px; border-radius: 16px; overflow: hidden;
+    gap: 1px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.07); }
+  .wd { background: rgba(12,12,14,.7); text-align: center; font-size: 12px; font-weight: 600; color: var(--muted); padding: 8px 0; }
+  .cell { all: unset; box-sizing: border-box; cursor: pointer; background: rgba(12,12,14,.55); min-height: 108px; padding: 6px; min-width: 0;
+    display: flex; flex-direction: column; gap: 4px; transition: background .15s var(--ease-standard); }
+  .cell:hover { background: rgba(255,255,255,.045); }
+  .cell:focus-visible { outline: 2px solid var(--orange); outline-offset: -2px; }
+  .cell.sel { background: rgba(255,102,0,.07); box-shadow: inset 0 0 0 1.5px rgba(255,102,0,.7); }
+  .cell .dn { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .cell.out { background: rgba(12,12,14,.3); }
+  .cell.out .dn { color: var(--faint); }
+  .cell.today .dn { background: var(--orange); color: var(--on-orange); font-weight: 700; }
+  .pills { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .pill { display: flex; align-items: center; gap: 3px; font-size: 11.5px; line-height: 1.35; padding: 2px 6px; border-radius: 5px; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(255,255,255,.08); color: #d2d2d7; }
+  .pill b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .pill.pod { background: var(--orange-soft); color: #ffb27d; }
+  .pill.done { background: var(--orange); color: var(--on-orange); font-weight: 600; }
+  .pill .ic { width: .95em; height: .95em; }
+  .more { font-size: 11px; color: var(--muted); padding-inline-start: 4px; }
+  .mdots { display: none; gap: 3px; justify-content: center; }
+  .mdots i { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); }
+  .mdots i.pod { background: #ffb27d; }
+  .mdots i.done { background: var(--orange); }
+  @media (max-width: 640px) {
+    .cal-head h1 { font-size: 26px; }
+    .cell { min-height: 54px; align-items: center; padding: 5px 2px; }
+    .pills { display: none; }
+    .mdots { display: flex; }
+  }
+  .day-detail { margin-top: 22px; }
+  .day-detail h3 { font-size: 17px; margin-bottom: 10px; }
+  .ev.done-ev { background: var(--orange-soft); }
+  .ev.done-ev .tm { color: var(--orange); }
+  .toast { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
+    background: var(--tip-bg); color: var(--ink); border: 1px solid var(--hair); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+    padding: 11px 18px; border-radius: 999px; z-index: 30; font-size: 15px; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+  @media (prefers-reduced-motion: reduce) { .tip.glide, .tbody, .bar > i, button { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="side">
+    <div class="brand">
+      <img src="talks-logo.webp" alt="talks." width="132" height="44">
+      <div class="brand-row">
+        <span class="small">מונה פודקאסטים</span>
+        <span class="status" id="status">מתחבר...</span>
+      </div>
+    </div>
+    <button class="primary" id="newPkgBtn" hidden>+ חבילה חדשה</button>
+    <button id="calBtn"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>לוח חודשי</button>
+    <div class="panel">
+      <h2>חבילות</h2>
+      <div class="pkg-list" id="pkgList"><div class="small">טוען חבילות...</div></div>
+    </div>
+    <button class="ghost" id="whoBtn" hidden></button>
+  </aside>
+  <main class="panel" id="main">
+    <div class="empty">טוען את הנתונים...</div>
+  </main>
+</div>
+<div id="modalRoot"></div>
+
+<script>
+// No-login version: the secret token in the link (#...) opens the counter; edits also need the PIN.
+// Data lives in Supabase behind functions that check the token and PIN (see supabase-setup.sql).
+const SB_URL = 'https://qzgwbfpwqnwqqtdfvcxn.supabase.co';
+const SB_KEY = 'sb_publishable_uKCNOou3bU6mjmA_pymPpQ_h878oJky';
+const POLL_MS = 15000;
+
+const I = {
+  cal: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  check: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  undo: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg>'
+};
+const token = decodeURIComponent(location.hash.slice(1));
+let packages = [], episodes = [], lastSnap = '', loaded = false, linkError = null, offline = false;
+let view = 'pkg', selectedId = null;
+const store = {
+  get(k) { try { return localStorage.getItem('pc-' + k); } catch (e) { return null; } },
+  set(k, v) { try { v == null ? localStorage.removeItem('pc-' + k) : localStorage.setItem('pc-' + k, v); } catch (e) {} }
+};
+selectedId = store.get('selected');
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const today = () => new Date().toLocaleDateString('en-CA');
+const addDays = (d, n) => { const x = new Date(d + 'T00:00'); x.setDate(x.getDate() + n); return x.toLocaleDateString('en-CA'); };
+const fmtDate = d => d ? new Date(d + 'T00:00').toLocaleDateString('he-IL') : '';
+const fmtDay = d => new Date(d + 'T00:00').toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
+const current = () => packages.find(p => p.id === selectedId);
+const epsOf = id => episodes.filter(e => e.pkg === id).sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.at || '').localeCompare(b.at || ''));
+const pct = p => p.total ? Math.min(100, Math.round(epsOf(p.id).length / p.total * 100)) : 0;
+const epName = (e, n) => e.title || (e.guest ? 'פרק עם ' + e.guest : 'פרק ' + n);
+function select(id) { selectedId = id; store.set('selected', id); }
+
+function toast(text) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = text;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3200);
+}
+
+// ---------- server ----------
+async function rpc(fn, args) {
+  const headers = { apikey: SB_KEY, 'Content-Type': 'application/json' };
+  if (!SB_KEY.startsWith('sb_')) headers.Authorization = 'Bearer ' + SB_KEY;
+  let r;
+  try { r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(args) }); }
+  catch (e) { throw { code: 'network' }; }
+  const body = await r.json().catch(() => null);
+  if (!r.ok) throw { code: (body && body.message) || 'server' };
+  return body;
+}
+async function load() {
+  if (!token) { linkError = 'missing'; return render(); }
+  try {
+    const s = await rpc('pc_state', { p_token: token });
+    packages = s.packages.map(p => ({ ...p, guests: p.guests || [] }));
+    episodes = s.episodes.map(e => ({ id: e.id, pkg: e.package_id, guest: e.guest, title: e.title, date: e.date, note: e.note, by: e.by_name, at: e.created_at }));
+    const snap = JSON.stringify(s);
+    const changed = snap !== lastSnap || !loaded || offline;
+    lastSnap = snap; loaded = true; offline = false; linkError = null;
+    if (!changed) return;
+  } catch (e) {
+    if (e.code === 'bad_token') linkError = 'bad';
+    else offline = true;
+  }
+  render();
+}
+setInterval(() => { if (document.visibilityState === 'visible') load(); }, POLL_MS);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') load(); });
+
+// PIN: asked once per device, kept in this browser. A wrong PIN clears it and asks again.
+function askPin(again) {
+  return new Promise(resolve => {
+    openModal(`<form id="pinForm">
+      <h3>קוד עריכה</h3>
+      <div class="small" style="margin-top:6px">${again ? 'הקוד לא נכון. נסה שוב.' : 'כדי לסמן ולערוך פרקים צריך את הקוד שקיבלת. הוא יישמר במכשיר הזה.'}</div>
+      <label for="f-pin">קוד</label>
+      <input id="f-pin" name="pin" inputmode="numeric" autocomplete="off" required>
+      <label for="f-who">השם שלך (לא חובה)</label>
+      <input id="f-who" name="who" placeholder="יופיע ליד פרקים שתסמן" value="${esc(store.get('who') || '')}">
+      <div class="actions"><button class="primary">המשך</button><button type="button" id="pinCancel">ביטול</button></div>
+    </form>`);
+    $('f-pin').focus();
+    $('pinCancel').onclick = () => { closeModal(); resolve(null); };
+    $('pinForm').onsubmit = async ev => {
+      ev.preventDefault();
+      const pin = ev.target.pin.value.trim(), who = ev.target.who.value.trim();
+      let res;
+      try { res = await rpc('pc_check_pin', { p_token: token, p_pin: pin }); } catch (e) { res = { ok: false, error: e.code }; }
+      if (res.ok) { store.set('pin', pin); store.set('who', who || null); closeModal(); renderWho(); resolve(pin); return; }
+      if (res.error === 'locked') { closeModal(); toast('יותר מדי ניסיונות. אפשר לנסות שוב בעוד 15 דקות.'); resolve(null); return; }
+      if (res.error === 'bad_pin') { closeModal(); resolve(await askPin(true)); return; }
+      closeModal(); toast('אין חיבור כרגע. נסה שוב.'); resolve(null);
+    };
+  });
+}
+async function getPin() { return store.get('pin') || await askPin(false); }
+
+// Runs one edit with the PIN; reloads the shared state afterwards
+async function write(fn, args, okText) {
+  const pin = await getPin(); if (!pin) return false;
+  if ('p_by_name' in args) args.p_by_name = store.get('who') || '';  // the name may have just been entered with the PIN
+  let res;
+  try { res = await rpc(fn, { p_token: token, p_pin: pin, ...args }); } catch (e) { res = { ok: false, error: e.code }; }
+  if (res.ok) { if (okText) toast(okText); await load(); return true; }
+  if (res.error === 'bad_pin') { store.set('pin', null); const again = await askPin(true); if (again) return write(fn, args, okText); return false; }
+  if (res.error === 'locked') toast('יותר מדי ניסיונות. אפשר לנסות שוב בעוד 15 דקות.');
+  else if (res.error === 'not_found') { toast('הפריט כבר נמחק על ידי מישהו אחר.'); await load(); }
+  else toast('השמירה לא הצליחה. בדוק את החיבור ונסה שוב.');
+  return false;
+}
+
+// ---------- rendering ----------
+function renderWho() {
+  const b = $('whoBtn'), pin = store.get('pin');
+  b.hidden = !pin;
+  b.textContent = pin ? `מחובר לעריכה${store.get('who') ? ' כ' + store.get('who') : ''} · יציאה` : '';
+}
+$('whoBtn').onclick = () => { store.set('pin', null); renderWho(); toast('יצאת ממצב עריכה במכשיר הזה'); };
+
+function render() {
+  $('newPkgBtn').hidden = !!linkError || !loaded;
+  $('calBtn').classList.toggle('active', view === 'calendar');
+  const st = $('status');
+  st.textContent = linkError ? 'קישור לא תקין' : offline ? 'אין חיבור' : loaded ? '● משותף' : 'מתחבר...';
+  st.className = 'status' + (loaded && !offline && !linkError ? ' live' : '');
+
+  $('pkgList').innerHTML = linkError ? '<div class="small">—</div>'
+    : !loaded ? '<div class="small">טוען חבילות...</div>'
+    : packages.length ? packages.map(p => `
+      <button class="pkg ${view === 'pkg' && p.id === selectedId ? 'active' : ''}" data-id="${esc(p.id)}">
+        <div class="nm">${esc(p.client)}</div>
+        <div class="sub">${epsOf(p.id).length} / ${p.total} · ${pct(p)}%</div>
+        <div class="mini-bar"><i style="width:${pct(p)}%"></i></div>
+      </button>`).join('') : '<div class="small">עדיין אין חבילות</div>';
+
+  const main = $('main');
+  if (linkError) {
+    main.innerHTML = `<div class="empty"><h3>${linkError === 'missing' ? 'חסר חלק בקישור' : 'הקישור לא תקין'}</h3>
+      <div>פתח את הקישור המלא שקיבלת. הוא נגמר בסימן # ואחריו רצף של אותיות ומספרים.</div></div>`;
+    return;
+  }
+  if (!loaded) { main.innerHTML = `<div class="empty">${offline ? 'אין חיבור לשרת. מנסה שוב...' : 'טוען את הנתונים...'}</div>`; return; }
+  if (view === 'calendar') return renderMonth(main);
+  if (!current() && packages.length) select(packages[0].id);
+  const p = current();
+  if (!p) {
+    main.innerHTML = `<div class="empty"><h3>עוד אין חבילות</h3>
+      <div>חבילה היא מספר פרקים שנמכרו ללקוח, למשל 60. כל מי שיש לו את הקישור יראה את הספירה.</div>
+      <button class="primary big" onclick="openPkg()">+ חבילה חדשה</button></div>`;
+    return;
+  }
+  const eps = epsOf(p.id), done = eps.length, left = Math.max(0, p.total - done);
+  const dots = Array.from({ length: Math.max(p.total, done) }, (_, i) =>
+    `<div class="dot ${i < done ? 'on' : ''}" data-i="${i}" ${i < done ? 'tabindex="0"' : ''}>${i + 1}</div>`).join('');
+  const list = eps.map((e, i) => ({ e, n: i + 1 })).reverse().map(({ e, n }) => `
+    <li>
+      <div class="n">${n}</div>
+      <div>
+        <div class="t">${esc(epName(e, n))}</div>
+        <div class="meta">${e.guest && e.title ? 'עם ' + esc(e.guest) + ' · ' : ''}${fmtDate(e.date)}${e.by ? ' · סימן: ' + esc(e.by) : ''}</div>
+        ${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}
+      </div>
+      <div class="row">
+        <a class="cal-link" href="${calUrl(p, e, n)}" target="_blank" rel="noopener">${I.cal}הוסף ליומן</a>
+        <button class="ghost" onclick="openEp('${esc(e.id)}')">עריכה</button>
+        <button class="ghost danger" onclick="delEp('${esc(e.id)}')">מחיקה</button>
+      </div>
+    </li>`).join('');
+  main.innerHTML = `
+    <div class="head">
+      <div style="min-width:0">
+        <h1>${esc(p.client)}</h1>
+        <div class="small">חבילה של ${p.total} פרקים${p.note ? ' · ' + esc(p.note) : ''}</div>
+        ${p.guests.length ? `<div class="small">מוזמנים: <span dir="ltr">${p.guests.map(esc).join(', ')}</span></div>` : ''}
+      </div>
+      <div class="row"><button onclick="openPkg('${esc(p.id)}')">עריכת חבילה</button>
+        <button class="ghost danger" onclick="delPkg()">מחיקה</button></div>
+    </div>
+    <div class="stats">
+      <div class="stat done"><b>${done}</b><span>נגמרו</span></div>
+      <div class="stat"><b>${left}</b><span>נשארו</span></div>
+      <div class="stat"><b>${pct(p)}%</b><span>הושלם</span></div>
+    </div>
+    <div class="bar"><i style="width:${pct(p)}%"></i></div>
+    <div class="dots" id="dots">${dots}</div>
+    ${done >= p.total ? `<div class="complete">${I.check}החבילה הושלמה!</div>` : ''}
+    <div class="row" style="margin-bottom:14px">
+      <button class="primary big" onclick="openEp()">${I.check}סיימתי פרק</button>
+      <button onclick="undoLast()" ${done ? '' : 'disabled'}>${I.undo}ביטול אחרון</button></div>
+    <h2>פרקים שנגמרו</h2>
+    ${done ? `<ul class="eps">${list}</ul>` : '<div class="small">עוד לא סומן אף פרק.</div>'}
+    <div class="tip" id="tip"><div class="bubble"><div class="tbody"></div></div></div>`;
+  tipIndex = null;
+}
+
+function calUrl(p, e, n) {
+  const ymd = d => d.replaceAll('-', '');
+  const name = e.title || (e.guest ? 'עם ' + e.guest : '');
+  const params = { action: 'TEMPLATE', text: `פרק ${n}${name ? ' – ' + name : ''} · ${p.client}`,
+    dates: `${ymd(e.date || today())}/${ymd(addDays(e.date || today(), 1))}`,
+    details: [`פרק ${n} מתוך ${p.total} בחבילה "${p.client}"`, e.note].filter(Boolean).join('\n') };
+  if (p.guests.length) params.add = p.guests.join(',');
+  return 'https://calendar.google.com/calendar/render?' + new URLSearchParams(params);
+}
+
+// ---------- hover bubble ----------
+let tipIndex = null, tipHide = 0;
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+function showTip(i, cell) {
+  const main = $('main'), tip = $('tip'); if (!tip) return;
+  const body = tip.querySelector('.tbody'), p = current(), e = epsOf(p.id)[i], n = i + 1;
+  clearTimeout(tipHide);
+  const wasOpen = tip.classList.contains('open');
+  if (wasOpen && tipIndex === i) return;
+  const dir = wasOpen ? Math.sign(i - tipIndex) || 1 : 1, animate = wasOpen && !reducedMotion.matches;
+  tipIndex = i;
+  const old = [...body.children];
+  old.forEach(o => { o.style.position = 'absolute'; o.style.top = 0; o.style.right = 0; });
+  const lines = document.createElement('div');
+  lines.className = 'tlines';
+  lines.innerHTML = `<span class="tp">${esc(epName(e, n))}</span>
+    <span class="ts">פרק ${n} מתוך ${p.total} · ${fmtDate(e.date)}</span>
+    ${e.note ? `<span class="tn">${esc(e.note)}</span>` : ''}`;
+  body.appendChild(lines);
+  const w = lines.offsetWidth, h = lines.offsetHeight;
+  if (animate) {
+    old.forEach(o => o.animate([{ opacity: 1 }, { opacity: 0, transform: `translateY(${-0.3 * dir}em)`, filter: 'blur(2px)' }],
+      { duration: 120, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards' }).onfinish = () => o.remove());
+    lines.animate([{ opacity: 0, transform: `translateY(${0.3 * dir}em)`, filter: 'blur(3px)' }, { opacity: 1, transform: 'none', filter: 'none' }],
+      { duration: 220, easing: 'cubic-bezier(.16,1,.3,1)' });
+  } else { old.forEach(o => o.remove()); body.style.transition = 'none'; }
+  body.style.width = w + 'px'; body.style.height = h + 'px';
+  const mb = main.getBoundingClientRect(), cb = cell.getBoundingClientRect(), half = w / 2 + 14;
+  const x = Math.min(Math.max(cb.left - mb.left + cb.width / 2, half + 2), mb.width - half - 2);
+  tip.classList.toggle('glide', animate);
+  tip.style.transform = `translate(${x}px, ${cb.top - mb.top}px)`;
+  tip.classList.add('open');
+  if (!animate) { body.offsetWidth; body.style.transition = ''; }
+}
+function hideTip(delay) { clearTimeout(tipHide); tipHide = setTimeout(() => $('tip')?.classList.remove('open'), delay); }
+$('main').addEventListener('pointerover', ev => {
+  const d = ev.target.closest('.dot'); if (!d) return;
+  if (d.classList.contains('on')) showTip(+d.dataset.i, d); else hideTip(110);
+});
+$('main').addEventListener('pointerout', ev => {
+  if (ev.target.closest('.dots') && !ev.relatedTarget?.closest?.('.dots')) hideTip(ev.pointerType === 'touch' ? 2400 : 110);
+});
+$('main').addEventListener('focusin', ev => { const d = ev.target.closest('.dot.on'); if (d) showTip(+d.dataset.i, d); });
+$('main').addEventListener('focusout', ev => { if (ev.target.closest('.dot')) hideTip(0); });
+
+// ---------- modals ----------
+function openModal(html) { $('modalRoot').innerHTML = `<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`; }
+function closeModal() { $('modalRoot').innerHTML = ''; }
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('modalRoot').innerHTML) closeModal(); });
+function ask(text, yes) {
+  return new Promise(resolve => {
+    openModal(`<h3>${esc(text)}</h3><div class="actions">
+      <button class="primary" id="askYes">${esc(yes)}</button><button id="askNo">ביטול</button></div>`);
+    $('askYes').onclick = () => { closeModal(); resolve(true); };
+    $('askNo').onclick = () => { closeModal(); resolve(false); };
+  });
+}
+
+// ---------- packages ----------
+function openPkg(id) {
+  const p = packages.find(x => x.id === id);
+  openModal(`<form id="pkgForm">
+    <h3>${p ? 'עריכת חבילה' : 'חבילה חדשה'}</h3>
+    <label for="f-client">שם הלקוח / החבילה</label>
+    <input id="f-client" name="client" required placeholder="למשל: הפודקאסט של דנה" value="${esc(p?.client || '')}">
+    <label for="f-total">כמה פרקים בחבילה</label>
+    <input id="f-total" name="total" type="number" min="1" max="10000" required value="${p ? p.total : 60}">
+    <label for="f-note">הערה (לא חובה)</label>
+    <input id="f-note" name="note" placeholder="למשל: מחיר, תאריך התחלה" value="${esc(p?.note || '')}">
+    <label for="f-guests">מוזמנים לאירועים ביומן (לא חובה)</label>
+    <input id="f-guests" name="guests" dir="ltr" placeholder="client@gmail.com, editor@gmail.com" value="${esc((p?.guests || []).join(', '))}">
+    <div class="small">יתווספו לכל "הוסף ליומן" של החבילה</div>
+    <div class="actions"><button class="primary">שמירה</button><button type="button" onclick="closeModal()">ביטול</button></div>
+  </form>`);
+  $('f-client').focus();
+  $('pkgForm').onsubmit = async ev => {
+    ev.preventDefault();
+    const f = ev.target;
+    const args = { p_id: p ? p.id : null, p_client: f.client.value.trim(), p_total: Math.max(1, parseInt(f.total.value, 10) || 1),
+      p_note: f.note.value.trim(), p_guests: f.guests.value.split(/[\s,;]+/).filter(g => g.includes('@')) };
+    closeModal();
+    const before = new Set(packages.map(x => x.id));
+    if (await write('pc_save_package', args, p ? 'החבילה עודכנה' : 'החבילה נוצרה') && !p) {
+      const created = packages.find(x => !before.has(x.id));
+      if (created) { select(created.id); render(); }
+    }
+  };
+}
+async function delPkg() {
+  const p = current();
+  if (!await ask(`למחוק את החבילה "${p.client}" וכל הפרקים שלה? זה יימחק לכל מי שיש לו את הקישור.`, 'מחיקה')) return;
+  if (await write('pc_delete_package', { p_id: p.id }, 'החבילה נמחקה')) { selectedId = null; render(); }
+}
+
+// ---------- episodes ----------
+function openEp(id) {
+  const p = current(), e = episodes.find(x => x.id === id);
+  openModal(`<form id="epForm">
+    <h3>${e ? 'עריכת פרק' : `פרק ${epsOf(p.id).length + 1} גמור`}</h3>
+    <label for="f-guest">עם מי?</label>
+    <input id="f-guest" name="guest" placeholder="למשל: שי" value="${esc(e?.guest || '')}">
+    <label for="f-title">איזה פרק / נושא</label>
+    <input id="f-title" name="title" placeholder="לא חובה" value="${esc(e?.title || '')}">
+    <label for="f-date">תאריך</label>
+    <input id="f-date" name="date" type="date" required value="${e?.date || today()}">
+    <label for="f-note">הערה</label>
+    <textarea id="f-note" name="note" placeholder="לא חובה">${esc(e?.note || '')}</textarea>
+    <div class="actions"><button class="primary">שמירה</button><button type="button" onclick="closeModal()">ביטול</button></div>
+  </form>`);
+  $('f-guest').focus();
+  $('epForm').onsubmit = async ev => {
+    ev.preventDefault();
+    const f = ev.target;
+    closeModal();
+    await write('pc_save_episode', { p_id: e ? e.id : null, p_package_id: p.id, p_guest: f.guest.value.trim(), p_title: f.title.value.trim(),
+      p_date: f.date.value || today(), p_note: f.note.value.trim(), p_by_name: store.get('who') || '' }, e ? 'הפרק עודכן' : 'הפרק נוסף');
+  };
+}
+async function undoLast() {
+  const last = [...epsOf(current().id)].sort((a, b) => (a.at || '').localeCompare(b.at || '')).pop();
+  if (last) await write('pc_delete_episode', { p_id: last.id }, 'הפרק האחרון בוטל');
+}
+async function delEp(id) {
+  if (!await ask('למחוק את הפרק הזה?', 'מחיקה')) return;
+  await write('pc_delete_episode', { p_id: id }, 'הפרק נמחק');
+}
+
+// ---------- month board of finished episodes ----------
+let calMonth = today().slice(0, 7), calSel = today();
+const WEEKDAYS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
+function gridDays(m) {
+  const first = new Date(m + '-01T00:00'), days = [];
+  for (let i = 0; i < 42; i++) { const d = new Date(first); d.setDate(1 - first.getDay() + i); days.push(d.toLocaleDateString('en-CA')); }
+  return days[35].slice(0, 7) !== m ? days.slice(0, 35) : days;
+}
+function shiftMonth(n) {
+  const d = new Date(calMonth + '-01T00:00'); d.setMonth(d.getMonth() + n);
+  calMonth = d.toLocaleDateString('en-CA').slice(0, 7);
+  if (calSel.slice(0, 7) !== calMonth) calSel = calMonth + '-01';
+  render();
+}
+function goToday() { calMonth = today().slice(0, 7); calSel = today(); render(); }
+function pickDay(d) { calSel = d; calMonth = d.slice(0, 7); render(); }
+function episodesOn(d) {
+  return episodes.filter(e => e.date === d).map(e => {
+    const p = packages.find(x => x.id === e.pkg);
+    return { e, p, n: p ? epsOf(p.id).indexOf(e) + 1 : 0 };
+  });
+}
+function renderMonth(main) {
+  const monthName = new Date(calMonth + '-01T00:00').toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+  const t = today();
+  const cells = gridDays(calMonth).map(d => {
+    const eps = episodesOn(d);
+    const pills = eps.map(x => `<span class="pill done">${I.check}${esc(x.e.guest || x.e.title || 'פרק ' + x.n)}</span>`);
+    return `<button class="cell ${d.slice(0, 7) !== calMonth ? 'out' : ''} ${d === t ? 'today' : ''} ${d === calSel ? 'sel' : ''}"
+        onclick="pickDay('${d}')" aria-label="${fmtDay(d)}">
+      <span class="dn">${+d.slice(8)}</span>
+      <span class="pills">${pills.slice(0, 3).join('')}${pills.length > 3 ? `<span class="more">עוד ${pills.length - 3}</span>` : ''}</span>
+      <span class="mdots">${eps.slice(0, 4).map(() => '<i class="done"></i>').join('')}</span>
+    </button>`;
+  }).join('');
+  const eps = episodesOn(calSel);
+  main.innerHTML = `<div class="head cal-head">
+      <div><h1>${monthName}</h1><div class="small">הפרקים שנגמרו בכל החבילות</div></div>
+      <div class="row">
+        <button class="ghost icon-btn" onclick="shiftMonth(-1)" aria-label="החודש הקודם"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button onclick="goToday()">היום</button>
+        <button class="ghost icon-btn" onclick="shiftMonth(1)" aria-label="החודש הבא"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+      </div></div>
+    <div class="cal-grid" role="grid">${WEEKDAYS.map(w => `<div class="wd">${w}</div>`).join('')}${cells}</div>
+    <section class="day-detail">
+      <h3>${fmtDay(calSel)}</h3>
+      ${eps.length ? eps.map(x => `<div class="ev done-ev"><span class="tm">${I.check}</span>
+        <span class="sm">${esc(epName(x.e, x.n))}<span class="small"> · פרק ${x.n} בחבילה ${esc(x.p?.client || '')}</span></span><span></span></div>`).join('')
+        : '<div class="small">לא נגמרו פרקים ביום הזה.</div>'}
+    </section>`;
+}
+
+// ---------- wiring ----------
+$('pkgList').addEventListener('click', ev => {
+  const b = ev.target.closest('.pkg'); if (!b) return;
+  view = 'pkg'; select(b.dataset.id); render();
+});
+$('newPkgBtn').onclick = () => openPkg();
+$('calBtn').onclick = () => { view = view === 'calendar' ? 'pkg' : 'calendar'; render(); };
+window.addEventListener('hashchange', () => location.reload());
+renderWho();
+render();
+load();
+</script>
+</body>
+</html>
