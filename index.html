@@ -95,7 +95,7 @@
   .dots { display: grid; grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 6px; margin: 20px 0; }
   .dot { aspect-ratio: 1; max-width: 100%; border-radius: 9px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.07);
     font-size: 11px; display: grid; place-items: center; color: var(--faint); font-variant-numeric: tabular-nums; }
-  .dot.on { background: var(--orange); border-color: var(--orange); color: var(--on-orange); font-weight: 600; box-shadow: 0 2px 10px rgba(255,102,0,.25); }
+  .dot.on { background: var(--c, var(--orange)); border-color: var(--c, var(--orange)); color: var(--c-ink, #fff); font-weight: 600; box-shadow: 0 2px 10px color-mix(in srgb, var(--c, #ff6600) 30%, transparent); }
   .complete { background: var(--orange-soft); color: var(--orange); border-radius: 14px; padding: 12px; text-align: center; font-weight: 600; margin-bottom: 14px; }
   .eps { list-style: none; margin: 0; padding: 0; }
   .eps li { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 14px 0; border-top: 1px solid rgba(255,255,255,.07); }
@@ -188,6 +188,31 @@
     background: var(--tip-bg); color: var(--ink); border: 1px solid var(--hair); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
     padding: 11px 18px; border-radius: 999px; z-index: 30; font-size: 15px; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0,0,0,.5); }
   .action-bar { margin-bottom: 14px; }
+  .cat-tag { display: inline-block; margin-inline-start: 8px; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; vertical-align: 2px;
+    color: var(--c); background: color-mix(in srgb, var(--c) 18%, transparent); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: -4px 0 16px; font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .legend i.none { background: transparent; border: 1.5px solid var(--faint); }
+  .legend b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-inline-end: 5px; }
+  .cat-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cat-opt { margin: 0; cursor: pointer; }
+  .cat-opt input { position: absolute; opacity: 0; pointer-events: none; }
+  .cat-opt span { display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--ink);
+    border: 1px solid var(--hair); background: var(--glass-strong); transition: background .15s, border-color .15s; }
+  .cat-opt span i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+  .cat-opt input:checked + span { background: color-mix(in srgb, var(--c, #8e8e93) 22%, transparent); border-color: var(--c, var(--muted)); }
+  .cat-opt input:focus-visible + span { outline: 2px solid var(--orange); outline-offset: 2px; }
+  .cat-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid rgba(255,255,255,.07); }
+  .cat-row .sw { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+  .cat-row .nm { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .swatch { width: 34px; height: 34px; border-radius: 50%; padding: 0; border: 2px solid transparent; background: var(--c); }
+  .swatch[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--bg, #1c1c1e) inset; }
+  .swatch-custom { width: 34px; height: 34px; padding: 0; border: 1px dashed var(--muted); border-radius: 50%; background: none; cursor: pointer; overflow: hidden; }
+  .swatch-custom::-webkit-color-swatch-wrapper { padding: 0; }
+  .swatch-custom::-webkit-color-swatch { border: 0; border-radius: 50%; }
   .eps .by { font-size: 12.5px; color: var(--faint); margin-top: 2px; }
   .eps .by b { color: var(--muted); font-weight: 600; }
   .nw { white-space: nowrap; unicode-bidi: isolate; }
@@ -206,7 +231,8 @@
     .brand img { width: 92px; }
     .brand-row { gap: 8px; flex-wrap: nowrap; }
     #newPkgBtn, #calBtn { padding: 10px 12px; font-size: 14px; }
-    #newPkgBtn[hidden] + #calBtn { grid-column: 1 / -1; }
+    #newPkgBtn[hidden] ~ #calBtn { grid-column: 1 / -1; }
+    #catBtn:not([hidden]) ~ #calBtn { grid-column: auto; }
     .side .panel { grid-column: 1 / -1; padding: 0; background: none; border: 0; }
     .side .panel h2 { display: none; }
     .pkg-list { flex-direction: row; overflow-x: auto; scroll-snap-type: x mandatory; gap: 8px; scrollbar-width: none; }
@@ -253,6 +279,7 @@
     </div>
     <button class="who-btn" id="whoBtn" hidden></button>
     <button class="primary" id="newPkgBtn" hidden>+ חבילה חדשה</button>
+    <button id="catBtn" hidden><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.2"/><circle cx="16" cy="8" r="3.2"/><circle cx="8" cy="16" r="3.2"/><circle cx="16" cy="16" r="3.2"/></svg>שיוכים</button>
     <button id="calBtn"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>לוח חודשי</button>
     <div class="panel">
       <h2>חבילות</h2>
@@ -279,7 +306,7 @@ const I = {
   undo: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg>'
 };
 const token = decodeURIComponent(location.hash.slice(1));
-let packages = [], episodes = [], lastSnap = '', loaded = false, linkError = null, offline = false;
+let packages = [], episodes = [], categories = [], lastSnap = '', loaded = false, linkError = null, offline = false;
 let view = 'pkg', selectedId = null;
 const store = {
   get(k) { try { return localStorage.getItem('pc-' + k); } catch (e) { return null; } },
@@ -316,6 +343,16 @@ function askName() {
     $('nameForm').onsubmit = ev => { ev.preventDefault(); const n = ev.target.who.value.trim(); store.set('who', n); closeModal(); renderWho(); resolve(n); };
   });
 }
+// Categories ("שיוך"): each episode may belong to one; its color paints the episode everywhere
+const PALETTE = ['#ff6600', '#0a84ff', '#30d158', '#bf5af2', '#ff375f', '#ffd60a', '#64d2ff', '#ff9f0a', '#8e8e93'];
+const catOf = e => e && e.cat ? categories.find(c => c.id === e.cat) || null : null;
+const colorOf = e => catOf(e)?.color || '#ff6600';
+function inkOn(hex) {  // black text on light colors, white on dark ones
+  const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 170 ? '#111' : '#fff';
+}
+const catVars = hex => `--c:${hex};--c-ink:${inkOn(hex)}`;
+const catTag = e => { const c = catOf(e); return c ? `<span class="cat-tag" style="${catVars(c.color)}">${esc(c.name)}</span>` : ''; };
 const fmtDay = d => new Date(d + 'T00:00').toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
 const current = () => packages.find(p => p.id === selectedId);
 const epsOf = id => episodes.filter(e => e.pkg === id).sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.at || '').localeCompare(b.at || ''));
@@ -349,7 +386,8 @@ async function load() {
   try {
     const s = await rpc('pc_state', { p_token: token });
     packages = s.packages.map(p => ({ ...p, guests: p.guests || [] }));
-    episodes = s.episodes.map(e => ({ id: e.id, pkg: e.package_id, guest: e.guest, title: e.title, date: e.date, note: e.note, by: e.by_name, at: e.created_at }));
+    categories = s.categories || [];
+    episodes = s.episodes.map(e => ({ id: e.id, pkg: e.package_id, cat: e.category_id || null, guest: e.guest, title: e.title, date: e.date, note: e.note, by: e.by_name, at: e.created_at }));
     const snap = JSON.stringify(s);
     const changed = snap !== lastSnap || !loaded || offline;
     lastSnap = snap; loaded = true; offline = false; linkError = null;
@@ -422,6 +460,7 @@ $('whoBtn').onclick = () => {
 
 function render() {
   $('newPkgBtn').hidden = !!linkError || !loaded || !isAdmin();
+  $('catBtn').hidden = !!linkError || !loaded || !isAdmin();
   renderWho();
   $('calBtn').classList.toggle('active', view === 'calendar');
   const st = $('status');
@@ -455,12 +494,17 @@ function render() {
   }
   const eps = epsOf(p.id), done = eps.length, left = Math.max(0, p.total - done);
   const dots = Array.from({ length: Math.max(p.total, done) }, (_, i) =>
-    `<div class="dot ${i < done ? 'on' : ''}" data-i="${i}" ${i < done ? 'tabindex="0"' : ''}>${i + 1}</div>`).join('');
+    i < done ? `<div class="dot on" data-i="${i}" tabindex="0" style="${catVars(colorOf(eps[i]))}">${i + 1}</div>`
+             : `<div class="dot" data-i="${i}">${i + 1}</div>`).join('');
+  const usedCats = categories.map(c => ({ c, n: eps.filter(e => e.cat === c.id).length })).filter(x => x.n);
+  const noCat = eps.filter(e => !catOf(e)).length;
+  const legend = categories.length && done ? `<div class="legend">${usedCats.map(x =>
+      `<span><i style="background:${x.c.color}"></i>${esc(x.c.name)} <b>${x.n}</b></span>`).join('')}${noCat ? `<span><i class="none"></i>ללא שיוך <b>${noCat}</b></span>` : ''}</div>` : '';
   const list = eps.map((e, i) => ({ e, n: i + 1 })).reverse().map(({ e, n }) => `
     <li>
       <div class="n">${n}</div>
       <div>
-        <div class="t">${esc(epName(e, n))}</div>
+        <div class="t">${esc(epName(e, n))}${catTag(e)}</div>
         <div class="meta">${e.guest && e.title ? 'עם ' + esc(e.guest) + ' · ' : ''}${fmtDate(e.date)}</div>
         ${e.by ? `<div class="by">סימן: <b>${esc(e.by)}</b> · <span class="nw">${fmtWhen(e.at)}</span></div>` : ''}
         ${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}
@@ -490,6 +534,7 @@ function render() {
     </div>
     <div class="bar"><i style="width:${pct(p)}%"></i></div>
     <div class="dots" id="dots">${dots}</div>
+    ${legend}
     ${done >= p.total ? `<div class="complete">${I.check}החבילה הושלמה!</div>` : ''}
     <div class="row action-bar">
       <button class="primary big" onclick="openEp()">${I.check}סיימתי פרק</button>
@@ -526,6 +571,7 @@ function showTip(i, cell) {
   const lines = document.createElement('div');
   lines.className = 'tlines';
   lines.innerHTML = `<span class="tp">${esc(epName(e, n))}</span>
+    ${catOf(e) ? `<span class="ts"><i class="tdot" style="background:${colorOf(e)}"></i>${esc(catOf(e).name)}</span>` : ''}
     <span class="ts">פרק ${n} מתוך ${p.total} · ${fmtDate(e.date)}</span>
     ${e.by ? `<span class="ts">סימן: ${esc(e.by)} · ${fmtWhen(e.at)}</span>` : ''}
     ${e.note ? `<span class="tn">${esc(e.note)}</span>` : ''}`;
@@ -612,6 +658,11 @@ function openEp(id) {
     <h3>${e ? 'עריכת פרק' : `פרק ${epsOf(p.id).length + 1} גמור`}</h3>
     <label for="f-guest">עם מי?</label>
     <input id="f-guest" name="guest" placeholder="למשל: שי" value="${esc(e?.guest || '')}">
+    ${categories.length ? `<label>שיוך</label>
+    <div class="cat-pick" role="radiogroup">
+      ${categories.map(c => `<label class="cat-opt" style="${catVars(c.color)}"><input type="radio" name="cat" value="${esc(c.id)}" ${(e ? e.cat === c.id : false) ? 'checked' : ''}><span><i></i>${esc(c.name)}</span></label>`).join('')}
+      <label class="cat-opt none"><input type="radio" name="cat" value="" ${!e || !catOf(e) ? 'checked' : ''}><span>ללא</span></label>
+    </div>` : ''}
     <label for="f-title">איזה פרק / נושא</label>
     <input id="f-title" name="title" placeholder="לא חובה" value="${esc(e?.title || '')}">
     <label for="f-date">תאריך</label>
@@ -627,7 +678,8 @@ function openEp(id) {
     closeModal();
     if (!e && store.get('pin') && !store.get('who') && !await askName()) return;
     await write('pc_save_episode', { p_id: e ? e.id : null, p_package_id: p.id, p_guest: f.guest.value.trim(), p_title: f.title.value.trim(),
-      p_date: f.date.value || today(), p_note: f.note.value.trim(), p_by_name: store.get('who') || '' }, e ? 'הפרק עודכן' : 'הפרק נוסף');
+      p_date: f.date.value || today(), p_note: f.note.value.trim(), p_by_name: store.get('who') || '',
+      p_category_id: (f.querySelector('input[name=cat]:checked') || {}).value || null }, e ? 'הפרק עודכן' : 'הפרק נוסף');
   };
 }
 const lastMarked = id => [...epsOf(id)].sort((a, b) => (a.at || '').localeCompare(b.at || '')).pop();
@@ -638,6 +690,51 @@ async function undoLast() {
 async function delEp(id) {
   if (!await ask('למחוק את הפרק הזה?', 'מחיקה')) return;
   await write('pc_delete_episode', { p_id: id }, 'הפרק נמחק');
+}
+
+// ---------- categories (admin) ----------
+function openCats() {
+  openModal(`<h3>שיוכים</h3>
+    <div class="small" style="margin:6px 0 12px">כל פרק אפשר לשייך לסוג, למשל פושביזנס או פושקאסט. הצבע יופיע על הפרק בכל מקום.</div>
+    ${categories.length ? categories.map(c => `<div class="cat-row"><span class="sw" style="background:${c.color}"></span>
+      <span class="nm">${esc(c.name)}</span>
+      <span class="small">${episodes.filter(e => e.cat === c.id).length} פרקים</span>
+      <button class="ghost" onclick="editCat('${esc(c.id)}')">עריכה</button>
+      <button class="ghost danger" onclick="delCat('${esc(c.id)}')">מחיקה</button></div>`).join('')
+      : '<div class="small">עוד אין שיוכים.</div>'}
+    <div class="actions"><button class="primary" onclick="editCat()">+ שיוך חדש</button><button onclick="closeModal()">סגירה</button></div>`);
+}
+function editCat(id) {
+  const c = categories.find(x => x.id === id);
+  let color = c ? c.color : PALETTE.find(p => !categories.some(x => x.color === p)) || PALETTE[0];
+  openModal(`<form id="catForm">
+    <h3>${c ? 'עריכת שיוך' : 'שיוך חדש'}</h3>
+    <label for="f-cname">שם</label>
+    <input id="f-cname" name="name" required maxlength="60" placeholder="למשל: פושביזנס" value="${esc(c?.name || '')}">
+    <label>צבע</label>
+    <div class="swatches" id="swatches">
+      ${PALETTE.map(p => `<button type="button" class="swatch" style="--c:${p}" data-c="${p}" aria-label="צבע ${p}"></button>`).join('')}
+      <input type="color" class="swatch-custom" id="f-ccolor" aria-label="צבע אחר" value="${color}">
+    </div>
+    <div class="actions"><button class="primary">שמירה</button><button type="button" onclick="openCats()">חזרה</button></div>
+  </form>`);
+  const mark = () => document.querySelectorAll('.swatch').forEach(s => s.setAttribute('aria-pressed', s.dataset.c === color));
+  mark();
+  $('swatches').addEventListener('click', ev => { const s = ev.target.closest('.swatch'); if (!s) return; color = s.dataset.c; $('f-ccolor').value = color; mark(); });
+  $('f-ccolor').addEventListener('input', ev => { color = ev.target.value; mark(); });
+  $('f-cname').focus();
+  $('catForm').onsubmit = async ev => {
+    ev.preventDefault();
+    const name = ev.target.name.value.trim();
+    closeModal();
+    if (await write('pc_save_category', { p_id: c ? c.id : null, p_name: name, p_color: color }, c ? 'השיוך עודכן' : 'השיוך נוסף')) openCats();
+  };
+}
+async function delCat(id) {
+  const c = categories.find(x => x.id === id);
+  const n = episodes.filter(e => e.cat === id).length;
+  if (!await ask(`למחוק את השיוך "${c.name}"?${n ? ` ${n} פרקים יישארו בלי שיוך.` : ''}`, 'מחיקה')) return openCats();
+  if (await write('pc_delete_category', { p_id: id }, 'השיוך נמחק')) openCats();
 }
 
 // ---------- month board of finished episodes ----------
@@ -667,12 +764,12 @@ function renderMonth(main) {
   const t = today();
   const cells = gridDays(calMonth).map(d => {
     const eps = episodesOn(d);
-    const pills = eps.map(x => `<span class="pill done">${I.check}${esc(x.e.guest || x.e.title || 'פרק ' + x.n)}</span>`);
+    const pills = eps.map(x => `<span class="pill done" style="${catVars(colorOf(x.e))}">${I.check}${esc(x.e.guest || x.e.title || 'פרק ' + x.n)}</span>`);
     return `<button class="cell ${d.slice(0, 7) !== calMonth ? 'out' : ''} ${d === t ? 'today' : ''} ${d === calSel ? 'sel' : ''}"
         onclick="pickDay('${d}')" aria-label="${fmtDay(d)}">
       <span class="dn">${+d.slice(8)}</span>
       <span class="pills">${pills.slice(0, 3).join('')}${pills.length > 3 ? `<span class="more">עוד ${pills.length - 3}</span>` : ''}</span>
-      <span class="mdots">${eps.slice(0, 4).map(() => '<i class="done"></i>').join('')}</span>
+      <span class="mdots">${eps.slice(0, 4).map(x => `<i class="done" style="background:${colorOf(x.e)}"></i>`).join('')}</span>
     </button>`;
   }).join('');
   const eps = episodesOn(calSel);
@@ -698,6 +795,7 @@ $('pkgList').addEventListener('click', ev => {
   view = 'pkg'; select(b.dataset.id); render();
 });
 $('newPkgBtn').onclick = () => openPkg();
+$('catBtn').onclick = () => openCats();
 $('calBtn').onclick = () => { view = view === 'calendar' ? 'pkg' : 'calendar'; render(); };
 window.addEventListener('hashchange', () => location.reload());
 setInterval(() => { if (loaded && !$('modalRoot').innerHTML) render(); }, 60000);
