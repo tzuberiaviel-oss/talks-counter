@@ -203,6 +203,43 @@
   .pay-legend i.sq { width: 11px; height: 11px; border-radius: 3px; background: var(--muted); }
   .pay-legend i.sq.hollow { background: transparent; border: 2px solid var(--muted); }
   .pay-chip, .cat-tag { white-space: nowrap; }
+  @media (min-width: 1240px) { .wrap.with-rail { max-width: 1440px; grid-template-columns: 290px minmax(0, 1fr) 330px; } }
+  @media (max-width: 1239px) { .wrap.with-rail .rail { grid-column: 1 / -1; } }
+  .rail { position: relative; align-self: start; display: flex; flex-direction: column; gap: 16px; }
+  .rail-tabs { display: flex; gap: 6px; }
+  .rail-tab { font-size: 14px; padding: 6px 14px; }
+  .rail-tab.active { background: var(--orange-soft); border-color: rgba(255,102,0,.45); color: var(--orange); }
+  .rail-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .rail-stats div { background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.06); border-radius: 14px; padding: 10px 12px; display: grid; gap: 2px; }
+  .rail-stats span { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .rail-stats b { font-family: var(--font-display); font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .chart { display: grid; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.07); }
+  .c-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .c-head h3 { font-size: 15px; }
+  .seg { display: inline-flex; padding: 2px; border-radius: 999px; background: rgba(0,0,0,.35); border: 1px solid var(--hair); }
+  .seg button { border: 0; background: transparent; padding: 4px 11px; font-size: 13px; color: var(--muted); }
+  .seg button.on { background: var(--glass-strong); color: var(--ink); }
+  .donut-wrap { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 14px; align-items: center; }
+  @media (max-width: 420px) { .donut-wrap { grid-template-columns: 1fr; justify-items: center; } }
+  .donut { width: 130px; height: 130px; }
+  .donut .arc { cursor: default; }
+  .d-big { fill: var(--ink); font-size: 15px; font-weight: 600; font-family: var(--font-display); }
+  .d-sm { fill: var(--muted); font-size: 9px; }
+  .c-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+  .c-legend li { display: grid; grid-template-columns: 10px minmax(0, 1fr); column-gap: 8px; font-size: 13px; }
+  .c-legend i { width: 10px; height: 10px; border-radius: 3px; margin-top: 4px; grid-row: span 2; }
+  .c-legend .lg-nm { font-weight: 600; overflow-wrap: anywhere; }
+  .c-legend .lg-v { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .bars { width: 100%; height: auto; overflow: visible; direction: ltr; }
+  .bars .gl { stroke: rgba(255,255,255,.07); }
+  .bars .bl { stroke: rgba(255,255,255,.18); }
+  .bars .gt, .bars .xt { fill: var(--faint); font-size: 9px; font-variant-numeric: tabular-nums; }
+  .bars .bar-r { fill: rgba(240,95,0,.55); }
+  .bars .bar-r.now { fill: #f05f00; }
+  .bars .bar-g:hover .bar-r { fill: #ff7a1f; }
+  .c-empty { padding: 6px 0; }
+  .rail-tip { position: absolute; transform: translateX(-50%); background: var(--tip-bg); color: var(--ink); border: 1px solid var(--hair);
+    padding: 5px 10px; border-radius: 8px; font-size: 12px; white-space: nowrap; pointer-events: none; z-index: 6; box-shadow: 0 6px 18px rgba(0,0,0,.4); }
   .eps li.grp { display: flex; align-items: center; gap: 8px; padding: 14px 0 6px; border-top: 1px solid rgba(255,255,255,.12); }
   .eps li.grp .g-nm { font-weight: 700; }
   .eps li.grp .pay-chip { margin: 0; }
@@ -334,6 +371,10 @@
   <main class="panel" id="main">
     <div class="empty">טוען את הנתונים...</div>
   </main>
+  <aside class="rail panel" id="rail" hidden>
+    <div class="rail-tabs" role="tablist"><button class="rail-tab active" role="tab" aria-selected="true">גרפים</button></div>
+    <div id="railBody"></div>
+  </aside>
 </div>
 <div id="modalRoot"></div>
 
@@ -351,7 +392,7 @@ const I = {
   undo: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg>'
 };
 const token = decodeURIComponent(location.hash.slice(1));
-let packages = [], episodes = [], categories = [], bundles = [], lastSnap = '', loaded = false, linkError = null, offline = false;
+let fin = { bundles: {}, packages: {} }, packages = [], episodes = [], categories = [], bundles = [], lastSnap = '', loaded = false, linkError = null, offline = false;
 let view = 'home', selectedId = null;
 const store = {
   get(k) { try { return localStorage.getItem('pc-' + k); } catch (e) { return null; } },
@@ -457,6 +498,7 @@ async function load() {
     const snap = JSON.stringify(s);
     const changed = snap !== lastSnap || !loaded || offline;
     lastSnap = snap; loaded = true; offline = false; linkError = null;
+    if (isAdmin()) loadFinance();
     if (!changed) return;
   } catch (e) {
     if (e.code === 'bad_token') linkError = 'bad';
@@ -552,6 +594,7 @@ function render() {
     return;
   }
   if (!loaded) { main.innerHTML = `<div class="empty">${offline ? 'אין חיבור לשרת. מנסה שוב...' : 'טוען את הנתונים...'}</div>`; return; }
+  renderRail();
   if (view === 'calendar') return renderMonth(main);
   if (view === 'home') return renderHome(main);
   if (!current() && packages.length) select(packages[0].id);
@@ -601,9 +644,9 @@ function render() {
   const list = scope !== 'all' || !secs.length ? newestFirst(items)
     : (rest.length ? `<li class="grp"><span class="g-nm">מחוץ לחבילה</span><span class="small">שולם ${rest.filter(x => paidOf(x.e)).length} · לא שולם ${rest.filter(x => !paidOf(x.e)).length}</span></li>${newestFirst(rest)}` : '')
       + [...secs].reverse().filter(s => s.items.length).map(s =>
-        `<li class="grp"><span class="g-nm">חבילה ${s.k + 1}${s.b.note ? ' · ' + esc(s.b.note) : ''}</span><span class="pay-chip paid">שולם מראש</span><span class="small">${s.items.length} / ${s.size}</span></li>${newestFirst(s.items)}`).join('');
+        `<li class="grp"><span class="g-nm">${esc(bName(s.b, s.k))}</span><span class="pay-chip paid">שולם מראש</span><span class="small">${s.items.length} / ${s.size}</span></li>${newestFirst(s.items)}`).join('');
 
-  const sub = scope === 'bundle' ? `חבילה ${sec.k + 1} · ${sec.size} פרקים${sec.b.note ? ' · ' + esc(sec.b.note) : ''}`
+  const sub = scope === 'bundle' ? `${esc(bName(sec.b, sec.k))} · ${sec.size} פרקים${isAdmin() && fin.bundles[sec.b.id]?.price != null ? ' · ' + money(fin.bundles[sec.b.id].price) : ''}`
     : scope === 'out' ? (secs.length ? 'פרקים מחוץ לחבילות' : 'פרויקט פתוח, בלי חבילה')
     : open ? 'פרויקט פתוח, בלי חבילה' : `${secs.length === 1 ? 'חבילה אחת' : secs.length + ' חבילות'} · ${cap} פרקים${p.note ? ' · ' + esc(p.note) : ''}`;
   const actions = !isAdmin() ? '' : scope === 'bundle'
@@ -642,6 +685,7 @@ function render() {
     ${done ? `<ul class="eps">${list}</ul>` : '<div class="small">עוד לא סומן אף פרק.</div>'}
     <div class="tip" id="tip"><div class="bubble"><div class="tbody"></div></div></div>`;
   tipIndex = null;
+  renderRail();
 }
 
 function calUrl(p, e, n) {
@@ -724,8 +768,10 @@ function openPkg(id) {
     ${p ? '' : `<label for="f-total">חבילה שנקנתה מראש (מספר פרקים, לא חובה)</label>
     <input id="f-total" name="total" type="number" min="1" max="10000" placeholder="למשל 60. ריק = פרויקט פתוח">
     <div class="small">אפשר להוסיף עוד חבילות בכל רגע מתוך הפרויקט.</div>`}
+    <label for="f-eprice">מחיר לפרק מחוץ לחבילות (₪, לא חובה)</label>
+    <input id="f-eprice" name="eprice" type="number" min="0" step="1" inputmode="numeric" placeholder="למשל 450" value="${p && fin.packages[p.id] != null ? fin.packages[p.id] : ''}">
     <label for="f-note">הערה (לא חובה)</label>
-    <input id="f-note" name="note" placeholder="למשל: מחיר, תאריך התחלה" value="${esc(p?.note || '')}">
+    <input id="f-note" name="note" placeholder="למשל: תאריך התחלה" value="${esc(p?.note || '')}">
     <label for="f-guests">מוזמנים לאירועים ביומן (לא חובה)</label>
     <input id="f-guests" name="guests" dir="ltr" placeholder="client@gmail.com, editor@gmail.com" value="${esc((p?.guests || []).join(', '))}">
     <div class="small">יתווספו לכל "הוסף ליומן" של הפרויקט</div>
@@ -739,14 +785,19 @@ function openPkg(id) {
       p_note: f.note.value.trim(), p_guests: f.guests.value.split(/[\s,;]+/).filter(g => g.includes('@')) };
     closeModal();
     const firstBundle = !p && parseInt(f.total.value, 10) > 0 ? Math.min(10000, parseInt(f.total.value, 10)) : 0;
+    const eprice = f.eprice.value === '' ? null : Math.max(0, Number(f.eprice.value));
     const before = new Set(packages.map(x => x.id));
-    if (await write('pc_save_package', args, p ? 'הפרויקט עודכן' : 'הפרויקט נוצר') && !p) {
+    const res = await write('pc_save_package', args, p ? 'הפרויקט עודכן' : 'הפרויקט נוצר');
+    if (!res) return;
+    if (eprice !== (p ? fin.packages[p.id] ?? null : null)) await write('pc_set_project_price', { p_id: res.id, p_price: eprice });
+    if (!p) {
       const created = packages.find(x => !before.has(x.id));
       if (created) {
         view = 'pkg'; select(created.id); render();
         if (firstBundle) await write('pc_save_bundle', { p_id: null, p_package_id: created.id, p_size: firstBundle, p_note: '' });
       }
     }
+    loadFinance();
   };
 }
 function openBundle(id) {
@@ -756,16 +807,22 @@ function openBundle(id) {
     <div class="small" style="margin-top:6px">חבילה שהלקוח קנה מראש. הפרקים ממלאים את החבילות לפי הסדר, ופרק שנכנס לחבילה נחשב שולם.</div>
     <label for="f-bsize">כמה פרקים בחבילה</label>
     <input id="f-bsize" name="size" type="number" min="1" max="10000" required value="${b ? b.size : 30}">
-    <label for="f-bnote">הערה (לא חובה)</label>
-    <input id="f-bnote" name="note" maxlength="200" placeholder="למשל: נקנתה בנובמבר" value="${esc(b?.note || '')}">
+    <label for="f-bnote">שם החבילה (לא חובה)</label>
+    <input id="f-bnote" name="note" maxlength="200" placeholder="למשל: חבילת פתיחה" value="${esc(b?.note || '')}">
+    <label for="f-bprice">מחיר החבילה (₪, לא חובה)</label>
+    <input id="f-bprice" name="price" type="number" min="0" step="1" inputmode="numeric" placeholder="למשל 12000" value="${b && fin.bundles[b.id]?.price != null ? fin.bundles[b.id].price : ''}">
+    <label for="f-bdate">תאריך הקנייה</label>
+    <input id="f-bdate" name="bought" type="date" value="${(b && fin.bundles[b.id]?.bought_on) || today()}">
     <div class="actions"><button class="primary">שמירה</button><button type="button" onclick="closeModal()">ביטול</button></div>
   </form>`);
   $('f-bsize').focus();
   $('bundleForm').onsubmit = async ev => {
     ev.preventDefault();
-    const size = Math.min(10000, Math.max(1, parseInt(ev.target.size.value, 10) || 1)), note = ev.target.note.value.trim();
+    const f = ev.target, size = Math.min(10000, Math.max(1, parseInt(f.size.value, 10) || 1)), note = f.note.value.trim();
+    const price = f.price.value === '' ? null : Math.max(0, Number(f.price.value)), bought = f.bought.value || today();
     closeModal();
-    await write('pc_save_bundle', { p_id: b ? b.id : null, p_package_id: p.id, p_size: size, p_note: note }, b ? 'החבילה עודכנה' : 'החבילה נוספה');
+    const res = await write('pc_save_bundle', { p_id: b ? b.id : null, p_package_id: p.id, p_size: size, p_note: note }, b ? 'החבילה עודכנה' : 'החבילה נוספה');
+    if (res) { await write('pc_set_bundle_money', { p_id: res.id, p_price: price, p_bought_on: bought }); loadFinance(); }
   };
 }
 async function delBundle(id) {
@@ -877,6 +934,120 @@ async function delCat(id) {
   if (await write('pc_delete_category', { p_id: id }, 'השיוך נמחק')) openCats();
 }
 
+// ---------- money and charts (admin only; prices come from pc_finance, never from the shared state) ----------
+const bName = (b, k) => b.note || `חבילה ${k + 1}`;
+const money = n => new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0 }).format(n || 0);
+// Project colors follow the project (creation order), never its rank; a 6th project and beyond fold into "אחר"
+const PROJ_COLORS = ['#f05f00', '#0a84ff', '#b08c00', '#bf5af2', '#1fa84a'], OTHER = '#8e8e93';
+const projColor = p => PROJ_COLORS[packages.indexOf(p)] || OTHER;
+let finLoading = false, chartMetric = 'money', barMode = 'month';
+async function loadFinance() {
+  if (finLoading || !isAdmin()) return;
+  finLoading = true;
+  try {
+    const r = await rpc('pc_finance', { p_token: token, p_pin: store.get('pin') });
+    if (r.ok) {
+      const next = { bundles: {}, packages: {} };
+      r.bundles.forEach(b => next.bundles[b.id] = { price: b.price == null ? null : Number(b.price), bought_on: b.bought_on });
+      r.packages.forEach(p => next.packages[p.id] = p.episode_price == null ? null : Number(p.episode_price));
+      const changed = JSON.stringify(next) !== JSON.stringify(fin);
+      fin = next;
+      if (changed) render();
+    }
+  } catch (e) {}
+  finLoading = false;
+}
+// Income: each package on its purchase date, plus paid episodes outside packages at the project's episode price
+function incomeItems() {
+  const out = [];
+  bundles.forEach(b => { const f = fin.bundles[b.id]; if (f && f.price) out.push({ pkg: b.pkg, amount: f.price, date: f.bought_on || (b.at || '').slice(0, 10) }); });
+  episodes.forEach(e => { const price = fin.packages[e.pkg]; if (price && e.paid && !inBundle(e)) out.push({ pkg: e.pkg, amount: price, date: e.date }); });
+  return out;
+}
+function renderRail() {
+  const rail = $('rail'), show = loaded && !linkError && isAdmin();
+  rail.hidden = !show;
+  document.querySelector('.wrap').classList.toggle('with-rail', show);
+  if (!show) return;
+  const items = incomeItems(), total = items.reduce((s, x) => s + x.amount, 0);
+  const y = today().slice(0, 4), m = today().slice(0, 7);
+  const yearSum = items.filter(x => (x.date || '').startsWith(y)).reduce((s, x) => s + x.amount, 0);
+  const monthSum = items.filter(x => (x.date || '').startsWith(m)).reduce((s, x) => s + x.amount, 0);
+
+  // Donut: share per project, by income or by number of episodes
+  const rows = packages.map(p => ({ p, v: chartMetric === 'money' ? items.filter(x => x.pkg === p.id).reduce((s, x) => s + x.amount, 0) : epsOf(p.id).length }))
+    .filter(r => r.v > 0);
+  const sum = rows.reduce((s, r) => s + r.v, 0);
+  const R = 52, C = 2 * Math.PI * R;
+  let acc = 0;
+  const arcs = rows.map(r => {
+    const len = r.v / sum * C, gap = rows.length > 1 ? 2 : 0;
+    const a = `<circle class="arc" cx="70" cy="70" r="${R}" fill="none" stroke="${projColor(r.p)}" stroke-width="18"
+      stroke-dasharray="${Math.max(0, len - gap)} ${C - Math.max(0, len - gap)}" stroke-dashoffset="${-acc}" transform="rotate(-90 70 70)"
+      data-tip="${esc(r.p.client)}: ${chartMetric === 'money' ? money(r.v) : r.v + ' פרקים'} (${Math.round(r.v / sum * 100)}%)"></circle>`;
+    acc += len;
+    return a;
+  }).join('');
+  const donut = sum ? `<div class="donut-wrap"><svg viewBox="0 0 140 140" class="donut" role="img" aria-label="חלוקה לפי פרויקט">
+      <circle cx="70" cy="70" r="${R}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="18"></circle>${arcs}
+      <text x="70" y="66" text-anchor="middle" class="d-big">${chartMetric === 'money' ? money(sum) : sum}</text>
+      <text x="70" y="84" text-anchor="middle" class="d-sm">${chartMetric === 'money' ? 'סה״כ הכנסות' : 'פרקים'}</text></svg>
+      <ul class="c-legend">${rows.sort((a, b) => b.v - a.v).map(r => `<li><i style="background:${projColor(r.p)}"></i><span class="lg-nm">${esc(r.p.client)}</span>
+        <span class="lg-v">${chartMetric === 'money' ? money(r.v) : r.v} · ${Math.round(r.v / sum * 100)}%</span></li>`).join('')}</ul></div>`
+    : `<div class="small c-empty">${chartMetric === 'money' ? 'עוד אין הכנסות. הוסף מחיר לחבילות (בעריכת חבילה) או מחיר לפרק (בעריכת פרויקט).' : 'עוד אין פרקים.'}</div>`;
+
+  // Bars: income per month (last 12 months) or per year
+  let buckets;
+  if (barMode === 'month') {
+    buckets = Array.from({ length: 12 }, (_, i) => { const d = new Date(m + '-01T00:00'); d.setMonth(d.getMonth() - 11 + i); const k = d.toLocaleDateString('en-CA').slice(0, 7);
+      return { k, label: d.toLocaleDateString('he-IL', { month: 'short' }), full: d.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' }) }; });
+  } else {
+    const years = [...new Set(items.map(x => (x.date || '').slice(0, 4)).filter(Boolean)), y].sort();
+    buckets = years.map(k => ({ k, label: k, full: k }));
+  }
+  buckets.forEach(bk => bk.v = items.filter(x => (x.date || '').startsWith(bk.k)).reduce((s, x) => s + x.amount, 0));
+  const max = Math.max(...buckets.map(b => b.v), 0);
+  const nice = max ? Math.pow(10, Math.floor(Math.log10(max))) * Math.ceil(max / Math.pow(10, Math.floor(Math.log10(max)))) : 1;
+  const W = 280, H = 150, top = 8, base = 120, left = 4, slot = (W - left) / buckets.length, bw = Math.min(22, slot * 0.6);
+  const grid = [0.5, 1].map(f => `<line x1="0" x2="${W}" y1="${base - (base - top) * f}" y2="${base - (base - top) * f}" class="gl"></line>
+      <text x="${W}" y="${base - (base - top) * f - 3}" class="gt" text-anchor="end">${money(nice * f)}</text>`).join('');
+  const bars = buckets.map((bk, i) => {
+    const h = bk.v ? Math.max(3, (base - top) * bk.v / nice) : 0, x = left + slot * i + (slot - bw) / 2;
+    return `<g class="bar-g" data-tip="${esc(bk.full)}: ${money(bk.v)}">
+      <rect x="${left + slot * i}" y="${top}" width="${slot}" height="${base - top}" fill="transparent"></rect>
+      ${h ? `<rect x="${x}" y="${base - h}" width="${bw}" height="${h}" rx="4" class="bar-r ${bk.k === (barMode === 'month' ? m : y) ? 'now' : ''}"></rect>` : ''}
+      <text x="${left + slot * i + slot / 2}" y="${base + 16}" text-anchor="middle" class="xt">${esc(bk.label)}</text></g>`;
+  }).join('');
+
+  $('railBody').innerHTML = `
+    <div class="rail-stats">
+      <div><span>החודש</span><b>${money(monthSum)}</b></div>
+      <div><span>השנה</span><b>${money(yearSum)}</b></div>
+    </div>
+    <section class="chart">
+      <div class="c-head"><h3>חלוקה לפי פרויקט</h3>
+        <div class="seg" role="group"><button class="${chartMetric === 'money' ? 'on' : ''}" onclick="chartMetric='money';renderRail()">הכנסות</button><button class="${chartMetric === 'eps' ? 'on' : ''}" onclick="chartMetric='eps';renderRail()">פרקים</button></div></div>
+      ${donut}
+    </section>
+    <section class="chart">
+      <div class="c-head"><h3>הכנסות</h3>
+        <div class="seg" role="group"><button class="${barMode === 'month' ? 'on' : ''}" onclick="barMode='month';renderRail()">חודשי</button><button class="${barMode === 'year' ? 'on' : ''}" onclick="barMode='year';renderRail()">שנתי</button></div></div>
+      ${total ? `<svg viewBox="0 0 ${W} ${H}" class="bars" role="img" aria-label="הכנסות ${barMode === 'month' ? 'חודשיות' : 'שנתיות'}">${grid}<line x1="0" x2="${W}" y1="${base}" y2="${base}" class="bl"></line>${bars}</svg>`
+        : '<div class="small c-empty">הגרף יופיע אחרי שתוסיף מחירים.</div>'}
+    </section>
+    <div class="rail-tip" id="railTip" hidden></div>`;
+}
+// One tooltip for both charts
+$('rail').addEventListener('pointerover', ev => {
+  const el = ev.target.closest('[data-tip]'), tip = $('railTip'); if (!tip) return;
+  if (!el) { tip.hidden = true; return; }
+  tip.textContent = el.dataset.tip; tip.hidden = false;
+  const rb = $('rail').getBoundingClientRect(), eb = el.getBoundingClientRect();
+  tip.style.top = (eb.top - rb.top - 34) + 'px';
+  tip.style.left = Math.min(Math.max(eb.left - rb.left + eb.width / 2, 70), rb.width - 70) + 'px';
+});
+$('rail').addEventListener('pointerleave', () => { const tip = $('railTip'); if (tip) tip.hidden = true; });
+
 // ---------- packages inside a project ----------
 // Episodes fill the packages in the order they were marked; whatever is left is "outside the packages"
 function sections(p) {
@@ -895,8 +1066,8 @@ function sideBundles(p) {
       <div class="nm">${nm}</div><div class="sub">${sub}</div>
       ${pctv == null ? '' : `<div class="mini-bar"><i style="width:${pctv}%"></i></div>`}</button>`;
   return item('', !selBundle, 'כל הפרויקט', `${eps.length === 1 ? 'פרק אחד' : eps.length + ' פרקים'}${capOf(p) ? ` · ${capOf(p)} בחבילות` : ''}`, null)
-    + secs.map(s => item(s.key, selBundle === s.key, `חבילה ${s.k + 1}<span class="badge">שולם מראש</span>`,
-        `${s.items.length} / ${s.size}${s.b.note ? ' · ' + esc(s.b.note) : ''}`, Math.round(s.items.length / s.size * 100))).join('')
+    + secs.map(s => item(s.key, selBundle === s.key, `${esc(bName(s.b, s.k))}<span class="badge">שולם מראש</span>`,
+        `${s.items.length} / ${s.size}${isAdmin() && fin.bundles[s.b.id]?.price != null ? ' · ' + money(fin.bundles[s.b.id].price) : ''}`, Math.round(s.items.length / s.size * 100))).join('')
     + (rest.length || !secs.length ? item('out', selBundle === 'out', secs.length ? 'מחוץ לחבילה' : 'פרקים בלי חבילה',
         `${rest.length} · שולם ${rest.filter(x => paidOf(x.e)).length} · לא שולם ${rest.filter(x => !paidOf(x.e)).length}`, null) : '')
     + (isAdmin() ? '<button class="ghost side-add" onclick="openBundle()">+ הוספת חבילה</button>' : '');
@@ -909,7 +1080,7 @@ function renderHome(main) {
     let start = 0;
     const bundleChips = bundlesOf(p.id).map((b, k) => {
       const used = Math.min(b.size, Math.max(0, done - start)); start += b.size;
-      return `<span class="${used >= b.size ? 'full' : ''}">חבילה ${k + 1} · ${used}/${b.size}</span>`;
+      return `<span class="${used >= b.size ? 'full' : ''}">${esc(bName(b, k))} · ${used}/${b.size}</span>`;
     }).join('');
     return `<button class="proj-card" onclick="openProject('${esc(p.id)}')">
       <span class="pc-name">${esc(p.client)}</span>
