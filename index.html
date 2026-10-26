@@ -203,6 +203,13 @@
   .pay-legend i.sq { width: 11px; height: 11px; border-radius: 3px; background: var(--muted); }
   .pay-legend i.sq.hollow { background: transparent; border: 2px solid var(--muted); }
   .pay-chip, .cat-tag { white-space: nowrap; }
+  .eps li.grp { display: flex; align-items: center; gap: 8px; padding: 14px 0 6px; border-top: 1px solid rgba(255,255,255,.12); }
+  .eps li.grp .g-nm { font-weight: 700; }
+  .eps li.grp .pay-chip { margin: 0; }
+  .eps li.grp .small { margin-inline-start: auto; font-variant-numeric: tabular-nums; }
+  .big-chip { font-size: 13px; vertical-align: 6px; }
+  .pkg .badge { display: inline-block; margin-inline-start: 6px; font-size: 11px; font-weight: 600; padding: 0 7px; border-radius: 999px; color: #32d74b; background: rgba(50,215,75,.12); border: 1px solid rgba(50,215,75,.4); vertical-align: 1px; }
+  .side-add { color: var(--orange); width: 100%; justify-content: center; margin-top: 4px; }
   .logo-btn { all: unset; cursor: pointer; display: block; border-radius: 8px; align-self: flex-start; }
   .logo-btn:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
   .logo-btn img { display: block; }
@@ -320,7 +327,7 @@
     <button class="primary" id="newPkgBtn" hidden>+ פרויקט חדש</button>
     <button id="calBtn"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>לוח חודשי</button>
     <div class="panel">
-      <h2>פרויקטים</h2>
+      <h2 id="sideTitle">פרויקטים</h2>
       <div class="pkg-list" id="pkgList"><div class="small">טוען פרויקטים...</div></div>
     </div>
   </aside>
@@ -394,8 +401,8 @@ const catVars = hex => `--c:${hex};--c-ink:${inkOn(hex)}`;
 const catTag = e => { const c = catOf(e); return c ? `<span class="cat-tag" style="${catVars(c.color)}">${esc(c.name)}</span>` : ''; };
 // Paid status: only the admin can change it; everyone sees it
 function payChip(e) {
-  if (inBundle(e)) return `<span class="pay-chip paid" title="נכלל בחבילה שנקנתה מראש">שולם · חבילה</span>`;
-  const label = e.paid ? 'שולם' : 'לא שולם';
+  if (inBundle(e) || e.paid) return '';  // paid by its package (shown on the package heading) or marked paid
+  const label = 'לא שולם';
   return isAdmin()
     ? `<button class="pay-chip ${e.paid ? 'paid' : ''}" onclick="togglePaid('${esc(e.id)}')" title="לחיצה משנה">${label}</button>`
     : `<span class="pay-chip ${e.paid ? 'paid' : ''}">${label}</span>`;
@@ -406,7 +413,8 @@ async function togglePaid(id) {
 }
 const fmtDay = d => new Date(d + 'T00:00').toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
 const current = () => packages.find(p => p.id === selectedId);
-const epsOf = id => episodes.filter(e => e.pkg === id).sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.at || '').localeCompare(b.at || ''));
+// Episodes in the order they were marked: number 1 is the first marked, the newest is last (and on top of lists)
+const epsOf = id => episodes.filter(e => e.pkg === id).sort((a, b) => (a.at || '').localeCompare(b.at || ''));
 // Prepaid packages ("חבילות") inside a project: episodes fill them in order and count as paid
 const bundlesOf = id => bundles.filter(b => b.pkg === id).sort((a, b) => (a.at || '').localeCompare(b.at || ''));
 const capOf = p => bundlesOf(p.id).reduce((s, b) => s + b.size, 0);
@@ -414,7 +422,8 @@ const pct = p => capOf(p) ? Math.min(100, Math.round(epsOf(p.id).length / capOf(
 const inBundle = e => { const p = packages.find(x => x.id === e.pkg); return !!p && epsOf(p.id).indexOf(e) < capOf(p); };
 const paidOf = e => e.paid || inBundle(e);
 const epName = (e, n) => e.title || (e.guest ? 'פרק עם ' + e.guest : 'פרק ' + n);
-function select(id) { selectedId = id; store.set('selected', id); }
+let selBundle = null;  // inside a project: null = whole project, a package id, or 'out' (episodes outside the packages)
+function select(id) { if (id !== selectedId) selBundle = null; selectedId = id; store.set('selected', id); }
 const isAdmin = () => !!store.get('pin') && store.get('role') === 'admin';
 // Non-admins may change or undo an episode only within 10 minutes of marking it (the server enforces this too)
 const UNDO_MS = 10 * 60 * 1000;
@@ -523,10 +532,14 @@ function render() {
   st.textContent = linkError ? 'קישור לא תקין' : offline ? 'אין חיבור' : loaded ? '● משותף' : 'מתחבר...';
   st.className = 'status' + (loaded && !offline && !linkError ? ' live' : '');
 
+  // Side panel: all projects on the home and month screens; inside a project, only that project's packages
+  const sp = view === 'pkg' && loaded ? current() : null;
+  $('sideTitle').textContent = sp ? 'חבילות · ' + sp.client : 'פרויקטים';
   $('pkgList').innerHTML = linkError ? '<div class="small">—</div>'
     : !loaded ? '<div class="small">טוען פרויקטים...</div>'
+    : sp ? sideBundles(sp)
     : packages.length ? packages.map(p => `
-      <button class="pkg ${view === 'pkg' && p.id === selectedId ? 'active' : ''}" data-id="${esc(p.id)}">
+      <button class="pkg" data-id="${esc(p.id)}">
         <div class="nm">${esc(p.client)}</div>
         <div class="sub">${capOf(p) ? `${epsOf(p.id).length} / ${capOf(p)} · ${pct(p)}%` : `${epsOf(p.id).length === 1 ? 'פרק אחד' : epsOf(p.id).length + ' פרקים'} · פתוח`}</div>
         ${capOf(p) ? `<div class="mini-bar"><i style="width:${pct(p)}%"></i></div>` : ''}
@@ -543,60 +556,69 @@ function render() {
   if (view === 'home') return renderHome(main);
   if (!current() && packages.length) select(packages[0].id);
   const p = current();
-  if (!p) {
-    main.innerHTML = `<div class="empty"><h3>עוד אין פרויקטים</h3>
-      <div>${isAdmin() ? 'פרויקט יכול להיות עם מספר פרקים קבוע, למשל 60, או פתוח: מוסיפים פרק בכל פעם שיש. כל מי שיש לו את הקישור יראה את הספירה.' : 'המנהל עוד לא יצר פרויקט.'}</div>
-      ${isAdmin() ? '<button class="primary big" onclick="openPkg()">+ פרויקט חדש</button>' : ''}</div>`;
-    return;
-  }
-  const eps = epsOf(p.id), done = eps.length, cap = capOf(p), open = !cap, left = open ? 0 : Math.max(0, cap - done);
-  const paidN = eps.filter(paidOf).length, unpaidN = done - paidN, over = cap ? Math.max(0, done - cap) : 0;
-  const dots = Array.from({ length: open ? done : Math.max(cap, done) }, (_, i) =>
-    i < done ? `<div class="dot on ${paidOf(eps[i]) ? '' : 'unpaid'}" data-i="${i}" tabindex="0" style="${catVars(colorOf(eps[i]))}">${i + 1}</div>`
-             : `<div class="dot" data-i="${i}">${i + 1}</div>`).join('');
-  const usedCats = catsOf(p.id).map(c => ({ c, n: eps.filter(e => e.cat === c.id).length })).filter(x => x.n);
-  const noCat = eps.filter(e => !catOf(e)).length;
+  if (!p) { view = 'home'; return render(); }
+
+  // What this screen shows: the whole project, one package, or the episodes outside the packages
+  const { secs, rest, eps } = sections(p);
+  const sec = secs.find(s => s.key === selBundle) || null;
+  if (selBundle && selBundle !== 'out' && !sec) selBundle = null;
+  const scope = sec ? 'bundle' : selBundle === 'out' ? 'out' : 'all';
+  const cap = scope === 'bundle' ? sec.size : scope === 'out' ? 0 : capOf(p);
+  const items = scope === 'bundle' ? sec.items : scope === 'out' ? rest : eps.map((e, i) => ({ e, i }));
+  const done = items.length, open = !cap, left = open ? 0 : Math.max(0, cap - done);
+  const paidN = items.filter(x => paidOf(x.e)).length, unpaidN = done - paidN;
+  const over = scope === 'all' && cap ? Math.max(0, done - cap) : 0;
+  const pctHere = cap ? Math.min(100, Math.round(done / cap * 100)) : 0;
+  const first = scope === 'bundle' ? sec.start : 0;
+  const dots = Array.from({ length: open ? done : Math.max(cap, done) }, (_, j) => {
+    const x = items[j];
+    return x ? `<div class="dot on ${paidOf(x.e) ? '' : 'unpaid'}" data-i="${x.i}" tabindex="0" style="${catVars(colorOf(x.e))}">${x.i + 1}</div>`
+             : `<div class="dot">${first + j + 1}</div>`;
+  }).join('');
+  const usedCats = catsOf(p.id).map(c => ({ c, n: items.filter(x => x.e.cat === c.id).length })).filter(x => x.n);
+  const noCat = items.filter(x => !catOf(x.e)).length;
   const legend = catsOf(p.id).length && done ? `<div class="legend">${usedCats.map(x =>
       `<span><i style="background:${x.c.color}"></i>${esc(x.c.name)} <b>${x.n}</b></span>`).join('')}${noCat ? `<span><i class="none"></i>ללא שיוך <b>${noCat}</b></span>` : ''}</div>` : '';
-  const payLegend = done ? `<div class="legend pay-legend"><span><i class="sq"></i>שולם <b>${paidN}</b></span><span><i class="sq hollow"></i>לא שולם <b>${unpaidN}</b></span>${over ? `<span>מעבר לחבילות <b>${over}</b></span>` : ''}</div>` : '';
-  let start = 0;
-  const bundleRows = bundlesOf(p.id).map((b, k) => {
-    const used = Math.min(b.size, Math.max(0, done - start)); start += b.size;
-    return `<div class="bundle-row ${used >= b.size ? 'full' : ''}">
-      <span class="nm">חבילה ${k + 1}${b.note ? ` <span class="small">· ${esc(b.note)}</span>` : ''}</span>
-      <span class="cnt">${used} / ${b.size}</span>
-      <span class="mini-bar"><i style="width:${Math.round(used / b.size * 100)}%"></i></span>
-      ${isAdmin() ? `<button class="ghost" onclick="openBundle('${esc(b.id)}')">עריכה</button><button class="ghost danger" onclick="delBundle('${esc(b.id)}')">מחיקה</button>` : ''}
-    </div>`;
-  }).join('');
-  const bundlesBox = bundleRows || isAdmin() ? `<section class="bundles">
-      <div class="bundles-head"><h2>חבילות שנקנו מראש</h2>${isAdmin() ? '<button class="ghost add" onclick="openBundle()">+ הוספת חבילה</button>' : ''}</div>
-      ${bundleRows || '<div class="small">אין חבילות. בלי חבילה הפרויקט פתוח, ומסמנים תשלום לכל פרק בנפרד.</div>'}
-    </section>` : '';
-  const list = eps.map((e, i) => ({ e, n: i + 1 })).reverse().map(({ e, n }) => `
+  const payLegend = done && scope !== 'bundle' ? `<div class="legend pay-legend"><span><i class="sq"></i>שולם <b>${paidN}</b></span><span><i class="sq hollow"></i>לא שולם <b>${unpaidN}</b></span>${over ? `<span>מעבר לחבילות <b>${over}</b></span>` : ''}</div>` : '';
+
+  const row = ({ e, i }) => `
     <li>
-      <div class="n">${n}</div>
+      <div class="n">${i + 1}</div>
       <div>
-        <div class="t">${esc(epName(e, n))}${catTag(e)}${payChip(e)}</div>
+        <div class="t">${esc(epName(e, i + 1))}${catTag(e)}${payChip(e)}</div>
         <div class="meta">${e.guest && e.title ? 'עם ' + esc(e.guest) + ' · ' : ''}${fmtDate(e.date)}</div>
         ${e.by ? `<div class="by">סימן: <b>${esc(e.by)}</b> · <span class="nw">${fmtWhen(e.at)}</span></div>` : ''}
         ${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}
       </div>
       <div class="row ep-actions">
-        <a class="cal-link" href="${calUrl(p, e, n)}" target="_blank" rel="noopener">${I.cal}הוסף ליומן</a>
+        <a class="cal-link" href="${calUrl(p, e, i + 1)}" target="_blank" rel="noopener">${I.cal}הוסף ליומן</a>
         ${canChange(e) ? `<button class="ghost" onclick="openEp('${esc(e.id)}')">עריכה</button>
         <button class="ghost danger" onclick="delEp('${esc(e.id)}')">מחיקה</button>` : ''}
       </div>
-    </li>`).join('');
+    </li>`;
+  const newestFirst = list => [...list].reverse().map(row).join('');
+  // Whole project: newest first, under a heading per package (the payment mark sits on the heading)
+  const list = scope !== 'all' || !secs.length ? newestFirst(items)
+    : (rest.length ? `<li class="grp"><span class="g-nm">מחוץ לחבילה</span><span class="small">שולם ${rest.filter(x => paidOf(x.e)).length} · לא שולם ${rest.filter(x => !paidOf(x.e)).length}</span></li>${newestFirst(rest)}` : '')
+      + [...secs].reverse().filter(s => s.items.length).map(s =>
+        `<li class="grp"><span class="g-nm">חבילה ${s.k + 1}${s.b.note ? ' · ' + esc(s.b.note) : ''}</span><span class="pay-chip paid">שולם מראש</span><span class="small">${s.items.length} / ${s.size}</span></li>${newestFirst(s.items)}`).join('');
+
+  const sub = scope === 'bundle' ? `חבילה ${sec.k + 1} · ${sec.size} פרקים${sec.b.note ? ' · ' + esc(sec.b.note) : ''}`
+    : scope === 'out' ? (secs.length ? 'פרקים מחוץ לחבילות' : 'פרויקט פתוח, בלי חבילה')
+    : open ? 'פרויקט פתוח, בלי חבילה' : `${secs.length === 1 ? 'חבילה אחת' : secs.length + ' חבילות'} · ${cap} פרקים${p.note ? ' · ' + esc(p.note) : ''}`;
+  const actions = !isAdmin() ? '' : scope === 'bundle'
+    ? `<div class="row head-actions"><button onclick="openBundle('${esc(sec.b.id)}')">עריכת חבילה</button><button class="ghost danger" onclick="delBundle('${esc(sec.b.id)}')">מחיקה</button></div>`
+    : scope === 'all' ? `<div class="row head-actions"><button onclick="openCats()">שיוכים</button><button onclick="openPkg('${esc(p.id)}')">עריכת פרויקט</button>
+        <button class="ghost danger" onclick="delPkg()">מחיקה</button></div>` : '';
+
   main.innerHTML = `
     <div class="head">
       <div style="min-width:0">
-        <h1>${esc(p.client)}</h1>
-        <div class="small">${open ? 'פרויקט פתוח, בלי חבילה' : `${bundlesOf(p.id).length === 1 ? 'חבילה אחת' : bundlesOf(p.id).length + ' חבילות'} · ${cap} פרקים`}${p.note ? ' · ' + esc(p.note) : ''}</div>
-        ${p.guests.length ? `<div class="small">מוזמנים: <span dir="ltr">${p.guests.map(esc).join(', ')}</span></div>` : ''}
+        <h1>${esc(p.client)}${scope === 'bundle' ? ` <span class="pay-chip paid big-chip">שולם מראש</span>` : ''}</h1>
+        <div class="small">${sub}</div>
+        ${scope === 'all' && p.guests.length ? `<div class="small">מוזמנים: <span dir="ltr">${p.guests.map(esc).join(', ')}</span></div>` : ''}
       </div>
-      ${isAdmin() ? `<div class="row head-actions"><button onclick="openCats()">שיוכים</button><button onclick="openPkg('${esc(p.id)}')">עריכת פרויקט</button>
-        <button class="ghost danger" onclick="delPkg()">מחיקה</button></div>` : ''}
+      ${actions}
     </div>
     ${store.get('pin') ? '' : `<div class="view-only"><span>מצב צפייה. כדי לסמן פרקים צריך קוד.</span>
       <button onclick="askPin(false)">${I.lock}הקלדת קוד</button></div>`}
@@ -606,18 +628,17 @@ function render() {
       <div class="stat"><b>${unpaidN}</b><span>לא שולמו</span></div>`
       : `<div class="stat done"><b>${done}</b><span>נגמרו</span></div>
       <div class="stat"><b>${left}</b><span>נשארו</span></div>
-      <div class="stat"><b>${pct(p)}%</b><span>הושלם</span></div>`}
+      <div class="stat"><b>${pctHere}%</b><span>הושלם</span></div>`}
     </div>
-    ${open ? '' : `<div class="bar"><i style="width:${pct(p)}%"></i></div>`}
+    ${open ? '' : `<div class="bar"><i style="width:${pctHere}%"></i></div>`}
     ${done || !open ? `<div class="dots" id="dots">${dots}</div>` : ''}
     ${payLegend}
     ${legend}
-    ${bundlesBox}
-    ${!open && done >= cap ? `<div class="complete">${I.check}כל החבילות נוצלו${over ? ` · ${over === 1 ? 'פרק אחד' : over + ' פרקים'} מעבר` : ''}</div>` : ''}
+    ${!open && done >= cap ? `<div class="complete">${I.check}${scope === 'bundle' ? 'החבילה מלאה' : 'כל החבילות נוצלו'}${over ? ` · ${over === 1 ? 'פרק אחד' : over + ' פרקים'} מעבר` : ''}</div>` : ''}
     <div class="row action-bar">
       <button class="primary big" onclick="openEp()">${I.check}סיימתי פרק</button>
       <button onclick="undoLast()" ${canChange(lastMarked(p.id)) ? '' : 'disabled'}>${I.undo}ביטול אחרון</button></div>
-    <h2>פרקים שנגמרו</h2>
+    <h2>${scope === 'bundle' ? 'הפרקים בחבילה' : scope === 'out' ? 'פרקים מחוץ לחבילה' : 'פרקים שנגמרו'}</h2>
     ${done ? `<ul class="eps">${list}</ul>` : '<div class="small">עוד לא סומן אף פרק.</div>'}
     <div class="tip" id="tip"><div class="bubble"><div class="tbody"></div></div></div>`;
   tipIndex = null;
@@ -856,6 +877,31 @@ async function delCat(id) {
   if (await write('pc_delete_category', { p_id: id }, 'השיוך נמחק')) openCats();
 }
 
+// ---------- packages inside a project ----------
+// Episodes fill the packages in the order they were marked; whatever is left is "outside the packages"
+function sections(p) {
+  const eps = epsOf(p.id);
+  let start = 0;
+  const secs = bundlesOf(p.id).map((b, k) => {
+    const s = { key: b.id, b, k, size: b.size, start, items: eps.slice(start, start + b.size).map((e, j) => ({ e, i: start + j })) };
+    start += b.size;
+    return s;
+  });
+  return { secs, rest: eps.slice(start).map((e, j) => ({ e, i: start + j })), eps };
+}
+function sideBundles(p) {
+  const { secs, rest, eps } = sections(p);
+  const item = (key, active, nm, sub, pctv) => `<button class="pkg ${active ? 'active' : ''}" data-b="${esc(key)}">
+      <div class="nm">${nm}</div><div class="sub">${sub}</div>
+      ${pctv == null ? '' : `<div class="mini-bar"><i style="width:${pctv}%"></i></div>`}</button>`;
+  return item('', !selBundle, 'כל הפרויקט', `${eps.length === 1 ? 'פרק אחד' : eps.length + ' פרקים'}${capOf(p) ? ` · ${capOf(p)} בחבילות` : ''}`, null)
+    + secs.map(s => item(s.key, selBundle === s.key, `חבילה ${s.k + 1}<span class="badge">שולם מראש</span>`,
+        `${s.items.length} / ${s.size}${s.b.note ? ' · ' + esc(s.b.note) : ''}`, Math.round(s.items.length / s.size * 100))).join('')
+    + (rest.length || !secs.length ? item('out', selBundle === 'out', secs.length ? 'מחוץ לחבילה' : 'פרקים בלי חבילה',
+        `${rest.length} · שולם ${rest.filter(x => paidOf(x.e)).length} · לא שולם ${rest.filter(x => !paidOf(x.e)).length}`, null) : '')
+    + (isAdmin() ? '<button class="ghost side-add" onclick="openBundle()">+ הוספת חבילה</button>' : '');
+}
+
 // ---------- all projects (the logo leads here) ----------
 function renderHome(main) {
   const cards = packages.map(p => {
@@ -939,6 +985,7 @@ function renderMonth(main) {
 // ---------- wiring ----------
 $('pkgList').addEventListener('click', ev => {
   const b = ev.target.closest('.pkg'); if (!b) return;
+  if (b.dataset.b !== undefined) { selBundle = b.dataset.b || null; render(); window.scrollTo(0, 0); return; }
   view = 'pkg'; select(b.dataset.id); render();
 });
 $('newPkgBtn').onclick = () => openPkg();
