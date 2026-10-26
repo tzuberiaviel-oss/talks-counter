@@ -203,6 +203,25 @@
   .pay-legend i.sq { width: 11px; height: 11px; border-radius: 3px; background: var(--muted); }
   .pay-legend i.sq.hollow { background: transparent; border: 2px solid var(--muted); }
   .pay-chip, .cat-tag { white-space: nowrap; }
+  .logo-btn { all: unset; cursor: pointer; display: block; border-radius: 8px; align-self: flex-start; }
+  .logo-btn:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
+  .logo-btn img { display: block; }
+  .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin-top: 20px; }
+  .proj-card { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 10px; min-width: 0;
+    padding: 18px; border-radius: 18px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.07); transition: border-color .15s, background .15s; }
+  .proj-card:hover { border-color: rgba(255,102,0,.45); background: rgba(255,255,255,.035); }
+  .proj-card:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+  .proj-card .pc-name { font-family: var(--font-display); font-size: 19px; font-weight: 600; overflow-wrap: anywhere; }
+  .proj-card .pc-big { font-family: var(--font-display); font-size: 34px; font-weight: 300; line-height: 1; font-variant-numeric: tabular-nums; }
+  .proj-card .pc-big b { color: var(--orange); font-weight: 500; }
+  .proj-card .pc-big span { font-size: 15px; color: var(--muted); font-weight: 500; margin-inline-start: 6px; }
+  .proj-card .mini-bar { margin: 0; }
+  .proj-card .pc-bundles { display: flex; flex-wrap: wrap; gap: 6px; }
+  .proj-card .pc-bundles span { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--glass-strong); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .proj-card .pc-bundles span.full { color: var(--orange); background: var(--orange-soft); }
+  .proj-card .pc-cats { display: flex; gap: 5px; }
+  .proj-card .pc-cats i { width: 9px; height: 9px; border-radius: 50%; }
+  .proj-card.add { align-items: center; justify-content: center; color: var(--orange); border-style: dashed; font-weight: 600; min-height: 150px; }
   .pay-chip { display: inline-block; margin-inline-start: 8px; padding: 1px 9px; border-radius: 999px; font: inherit; font-size: 12px; font-weight: 600; vertical-align: 2px;
     background: transparent; color: var(--muted); border: 1px dashed var(--faint); cursor: default; }
   .pay-chip.paid { color: #32d74b; border: 1px solid rgba(50,215,75,.45); background: rgba(50,215,75,.12); }
@@ -253,7 +272,6 @@
     .brand-row { gap: 8px; flex-wrap: nowrap; }
     #newPkgBtn, #calBtn { padding: 10px 12px; font-size: 14px; }
     #newPkgBtn[hidden] ~ #calBtn { grid-column: 1 / -1; }
-    #catBtn:not([hidden]) ~ #calBtn { grid-column: auto; }
     .side .panel { grid-column: 1 / -1; padding: 0; background: none; border: 0; }
     .side .panel h2 { display: none; }
     .pkg-list { flex-direction: row; overflow-x: auto; scroll-snap-type: x mandatory; gap: 8px; scrollbar-width: none; }
@@ -292,7 +310,7 @@
 <div class="wrap">
   <aside class="side">
     <div class="brand">
-      <img src="talks-logo.webp" alt="talks." width="132" height="44">
+      <button class="logo-btn" id="logoBtn" aria-label="כל הפרויקטים"><img src="talks-logo.webp" alt="talks." width="132" height="44"></button>
       <div class="brand-row">
         <span class="small">מונה פודקאסטים</span>
         <span class="status" id="status">מתחבר...</span>
@@ -300,7 +318,6 @@
     </div>
     <button class="who-btn" id="whoBtn" hidden></button>
     <button class="primary" id="newPkgBtn" hidden>+ פרויקט חדש</button>
-    <button id="catBtn" hidden><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.2"/><circle cx="16" cy="8" r="3.2"/><circle cx="8" cy="16" r="3.2"/><circle cx="16" cy="16" r="3.2"/></svg>שיוכים</button>
     <button id="calBtn"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>לוח חודשי</button>
     <div class="panel">
       <h2>פרויקטים</h2>
@@ -328,7 +345,7 @@ const I = {
 };
 const token = decodeURIComponent(location.hash.slice(1));
 let packages = [], episodes = [], categories = [], bundles = [], lastSnap = '', loaded = false, linkError = null, offline = false;
-let view = 'pkg', selectedId = null;
+let view = 'home', selectedId = null;
 const store = {
   get(k) { try { return localStorage.getItem('pc-' + k); } catch (e) { return null; } },
   set(k, v) { try { v == null ? localStorage.removeItem('pc-' + k) : localStorage.setItem('pc-' + k, v); } catch (e) {} }
@@ -366,6 +383,7 @@ function askName() {
 }
 // Categories ("שיוך"): each episode may belong to one; its color paints the episode everywhere
 const PALETTE = ['#ff6600', '#0a84ff', '#30d158', '#bf5af2', '#ff375f', '#ffd60a', '#64d2ff', '#ff9f0a', '#8e8e93'];
+const catsOf = pid => categories.filter(c => c.package_id === pid);
 const catOf = e => e && e.cat ? categories.find(c => c.id === e.cat) || null : null;
 const colorOf = e => catOf(e)?.color || '#ff6600';
 function inkOn(hex) {  // black text on light colors, white on dark ones
@@ -474,7 +492,7 @@ async function write(fn, args, okText) {
   if ('p_by_name' in args) args.p_by_name = store.get('who') || '';  // the name may have just been entered with the PIN
   let res;
   try { res = await rpc(fn, { p_token: token, p_pin: pin, ...args }); } catch (e) { res = { ok: false, error: e.code }; }
-  if (res.ok) { if (okText) toast(okText); await load(); return true; }
+  if (res.ok) { if (okText) toast(okText); await load(); return res; }
   if (res.error === 'bad_pin') { store.set('pin', null); store.set('role', null); const again = await askPin(true); if (again) return write(fn, args, okText); return false; }
   if (res.error === 'locked') toast('יותר מדי ניסיונות. אפשר לנסות שוב בעוד 15 דקות.');
   else if (res.error === 'not_found') { toast('הפריט כבר נמחק על ידי מישהו אחר.'); await load(); }
@@ -499,7 +517,6 @@ $('whoBtn').onclick = () => {
 
 function render() {
   $('newPkgBtn').hidden = !!linkError || !loaded || !isAdmin();
-  $('catBtn').hidden = !!linkError || !loaded || !isAdmin();
   renderWho();
   $('calBtn').classList.toggle('active', view === 'calendar');
   const st = $('status');
@@ -523,6 +540,7 @@ function render() {
   }
   if (!loaded) { main.innerHTML = `<div class="empty">${offline ? 'אין חיבור לשרת. מנסה שוב...' : 'טוען את הנתונים...'}</div>`; return; }
   if (view === 'calendar') return renderMonth(main);
+  if (view === 'home') return renderHome(main);
   if (!current() && packages.length) select(packages[0].id);
   const p = current();
   if (!p) {
@@ -536,9 +554,9 @@ function render() {
   const dots = Array.from({ length: open ? done : Math.max(cap, done) }, (_, i) =>
     i < done ? `<div class="dot on ${paidOf(eps[i]) ? '' : 'unpaid'}" data-i="${i}" tabindex="0" style="${catVars(colorOf(eps[i]))}">${i + 1}</div>`
              : `<div class="dot" data-i="${i}">${i + 1}</div>`).join('');
-  const usedCats = categories.map(c => ({ c, n: eps.filter(e => e.cat === c.id).length })).filter(x => x.n);
+  const usedCats = catsOf(p.id).map(c => ({ c, n: eps.filter(e => e.cat === c.id).length })).filter(x => x.n);
   const noCat = eps.filter(e => !catOf(e)).length;
-  const legend = categories.length && done ? `<div class="legend">${usedCats.map(x =>
+  const legend = catsOf(p.id).length && done ? `<div class="legend">${usedCats.map(x =>
       `<span><i style="background:${x.c.color}"></i>${esc(x.c.name)} <b>${x.n}</b></span>`).join('')}${noCat ? `<span><i class="none"></i>ללא שיוך <b>${noCat}</b></span>` : ''}</div>` : '';
   const payLegend = done ? `<div class="legend pay-legend"><span><i class="sq"></i>שולם <b>${paidN}</b></span><span><i class="sq hollow"></i>לא שולם <b>${unpaidN}</b></span>${over ? `<span>מעבר לחבילות <b>${over}</b></span>` : ''}</div>` : '';
   let start = 0;
@@ -577,7 +595,7 @@ function render() {
         <div class="small">${open ? 'פרויקט פתוח, בלי חבילה' : `${bundlesOf(p.id).length === 1 ? 'חבילה אחת' : bundlesOf(p.id).length + ' חבילות'} · ${cap} פרקים`}${p.note ? ' · ' + esc(p.note) : ''}</div>
         ${p.guests.length ? `<div class="small">מוזמנים: <span dir="ltr">${p.guests.map(esc).join(', ')}</span></div>` : ''}
       </div>
-      ${isAdmin() ? `<div class="row head-actions"><button onclick="openPkg('${esc(p.id)}')">עריכת פרויקט</button>
+      ${isAdmin() ? `<div class="row head-actions"><button onclick="openCats()">שיוכים</button><button onclick="openPkg('${esc(p.id)}')">עריכת פרויקט</button>
         <button class="ghost danger" onclick="delPkg()">מחיקה</button></div>` : ''}
     </div>
     ${store.get('pin') ? '' : `<div class="view-only"><span>מצב צפייה. כדי לסמן פרקים צריך קוד.</span>
@@ -704,7 +722,7 @@ function openPkg(id) {
     if (await write('pc_save_package', args, p ? 'הפרויקט עודכן' : 'הפרויקט נוצר') && !p) {
       const created = packages.find(x => !before.has(x.id));
       if (created) {
-        select(created.id); render();
+        view = 'pkg'; select(created.id); render();
         if (firstBundle) await write('pc_save_bundle', { p_id: null, p_package_id: created.id, p_size: firstBundle, p_note: '' });
       }
     }
@@ -742,15 +760,25 @@ async function delPkg() {
 // ---------- episodes ----------
 function openEp(id) {
   const p = current(), e = episodes.find(x => x.id === id);
+  // Payment (admin only): an episode that falls inside a prepaid package is paid by the package
+  const covered = e ? inBundle(e) : epsOf(p.id).length < capOf(p);
+  const payPick = !isAdmin() ? '' : covered
+    ? `<label>תשלום</label><div class="small">${e ? 'הפרק בתוך חבילה שנקנתה מראש, ולכן נחשב שולם.' : 'הפרק ייכנס לחבילה שנקנתה מראש וייחשב שולם אוטומטית.'}</div>`
+    : `<label>תשלום</label>
+    <div class="cat-pick" role="radiogroup">
+      <label class="cat-opt" style="--c:#32d74b"><input type="radio" name="paid" value="1" ${e && e.paid ? 'checked' : ''}><span><i></i>שולם</span></label>
+      <label class="cat-opt none"><input type="radio" name="paid" value="0" ${!e || !e.paid ? 'checked' : ''}><span>לא שולם</span></label>
+    </div>`;
   openModal(`<form id="epForm">
     <h3>${e ? 'עריכת פרק' : `פרק ${epsOf(p.id).length + 1} גמור`}</h3>
     <label for="f-guest">עם מי?</label>
     <input id="f-guest" name="guest" placeholder="למשל: שי" value="${esc(e?.guest || '')}">
-    ${categories.length ? `<label>שיוך</label>
+    ${catsOf(p.id).length ? `<label>שיוך</label>
     <div class="cat-pick" role="radiogroup">
-      ${categories.map(c => `<label class="cat-opt" style="${catVars(c.color)}"><input type="radio" name="cat" value="${esc(c.id)}" ${(e ? e.cat === c.id : false) ? 'checked' : ''}><span><i></i>${esc(c.name)}</span></label>`).join('')}
+      ${catsOf(p.id).map(c => `<label class="cat-opt" style="${catVars(c.color)}"><input type="radio" name="cat" value="${esc(c.id)}" ${(e ? e.cat === c.id : false) ? 'checked' : ''}><span><i></i>${esc(c.name)}</span></label>`).join('')}
       <label class="cat-opt none"><input type="radio" name="cat" value="" ${!e || !catOf(e) ? 'checked' : ''}><span>ללא</span></label>
     </div>` : ''}
+    ${payPick}
     <label for="f-title">איזה פרק / נושא</label>
     <input id="f-title" name="title" placeholder="לא חובה" value="${esc(e?.title || '')}">
     <label for="f-date">תאריך</label>
@@ -765,9 +793,11 @@ function openEp(id) {
     const f = ev.target;
     closeModal();
     if (!e && store.get('pin') && !store.get('who') && !await askName()) return;
-    await write('pc_save_episode', { p_id: e ? e.id : null, p_package_id: p.id, p_guest: f.guest.value.trim(), p_title: f.title.value.trim(),
+    const paidPick = f.querySelector('input[name=paid]:checked');
+    const res = await write('pc_save_episode', { p_id: e ? e.id : null, p_package_id: p.id, p_guest: f.guest.value.trim(), p_title: f.title.value.trim(),
       p_date: f.date.value || today(), p_note: f.note.value.trim(), p_by_name: store.get('who') || '',
       p_category_id: (f.querySelector('input[name=cat]:checked') || {}).value || null }, e ? 'הפרק עודכן' : 'הפרק נוסף');
+    if (res && paidPick && (paidPick.value === '1') !== !!(e && e.paid)) await write('pc_set_paid', { p_id: res.id, p_paid: paidPick.value === '1' });
   };
 }
 const lastMarked = id => [...epsOf(id)].sort((a, b) => (a.at || '').localeCompare(b.at || '')).pop();
@@ -782,9 +812,10 @@ async function delEp(id) {
 
 // ---------- categories (admin) ----------
 function openCats() {
-  openModal(`<h3>שיוכים</h3>
-    <div class="small" style="margin:6px 0 12px">כל פרק אפשר לשייך לסוג, למשל פושביזנס או פושקאסט. הצבע יופיע על הפרק בכל מקום.</div>
-    ${categories.length ? categories.map(c => `<div class="cat-row"><span class="sw" style="background:${c.color}"></span>
+  const p = current();
+  openModal(`<h3>שיוכים · ${esc(p.client)}</h3>
+    <div class="small" style="margin:6px 0 12px">השיוכים של הפרויקט הזה בלבד, למשל פושביזנס או פושקאסט. הצבע יופיע על הפרק בכל מקום.</div>
+    ${catsOf(p.id).length ? catsOf(p.id).map(c => `<div class="cat-row"><span class="sw" style="background:${c.color}"></span>
       <span class="nm">${esc(c.name)}</span>
       <span class="small">${episodes.filter(e => e.cat === c.id).length} פרקים</span>
       <button class="ghost" onclick="editCat('${esc(c.id)}')">עריכה</button>
@@ -794,7 +825,7 @@ function openCats() {
 }
 function editCat(id) {
   const c = categories.find(x => x.id === id);
-  let color = c ? c.color : PALETTE.find(p => !categories.some(x => x.color === p)) || PALETTE[0];
+  let color = c ? c.color : PALETTE.find(p => !catsOf(current().id).some(x => x.color === p)) || PALETTE[0];
   openModal(`<form id="catForm">
     <h3>${c ? 'עריכת שיוך' : 'שיוך חדש'}</h3>
     <label for="f-cname">שם</label>
@@ -815,7 +846,7 @@ function editCat(id) {
     ev.preventDefault();
     const name = ev.target.name.value.trim();
     closeModal();
-    if (await write('pc_save_category', { p_id: c ? c.id : null, p_name: name, p_color: color }, c ? 'השיוך עודכן' : 'השיוך נוסף')) openCats();
+    if (await write('pc_save_category', { p_id: c ? c.id : null, p_name: name, p_color: color, p_package_id: current().id }, c ? 'השיוך עודכן' : 'השיוך נוסף')) openCats();
   };
 }
 async function delCat(id) {
@@ -824,6 +855,34 @@ async function delCat(id) {
   if (!await ask(`למחוק את השיוך "${c.name}"?${n ? ` ${n} פרקים יישארו בלי שיוך.` : ''}`, 'מחיקה')) return openCats();
   if (await write('pc_delete_category', { p_id: id }, 'השיוך נמחק')) openCats();
 }
+
+// ---------- all projects (the logo leads here) ----------
+function renderHome(main) {
+  const cards = packages.map(p => {
+    const eps = epsOf(p.id), done = eps.length, cap = capOf(p), paidN = eps.filter(paidOf).length;
+    let start = 0;
+    const bundleChips = bundlesOf(p.id).map((b, k) => {
+      const used = Math.min(b.size, Math.max(0, done - start)); start += b.size;
+      return `<span class="${used >= b.size ? 'full' : ''}">חבילה ${k + 1} · ${used}/${b.size}</span>`;
+    }).join('');
+    return `<button class="proj-card" onclick="openProject('${esc(p.id)}')">
+      <span class="pc-name">${esc(p.client)}</span>
+      <span class="small">${cap ? `${bundlesOf(p.id).length === 1 ? 'חבילה אחת' : bundlesOf(p.id).length + ' חבילות'} · ${cap} פרקים` : 'פרויקט פתוח, בלי חבילה'}</span>
+      <span class="pc-big">${cap ? `<b>${done}</b><span>מתוך ${cap} · ${pct(p)}%</span>` : `<b>${done}</b><span>${done === 1 ? 'פרק' : 'פרקים'}</span>`}</span>
+      ${cap ? `<span class="mini-bar"><i style="width:${pct(p)}%"></i></span>` : ''}
+      ${bundleChips ? `<span class="pc-bundles">${bundleChips}</span>` : ''}
+      <span class="small">שולם ${paidN} · לא שולם ${done - paidN}</span>
+      ${catsOf(p.id).length ? `<span class="pc-cats">${catsOf(p.id).map(c => `<i style="background:${c.color}" title="${esc(c.name)}"></i>`).join('')}</span>` : ''}
+    </button>`;
+  }).join('');
+  main.innerHTML = `<div class="head"><div><h1>כל הפרויקטים</h1>
+      <div class="small">${packages.length === 1 ? 'פרויקט אחד' : packages.length + ' פרויקטים'}. לחיצה על פרויקט פותחת אותו.</div></div></div>
+    ${store.get('pin') ? '' : `<div class="view-only"><span>מצב צפייה. כדי לסמן פרקים צריך קוד.</span>
+      <button onclick="askPin(false)">${I.lock}הקלדת קוד</button></div>`}
+    <div class="home-grid">${cards}${isAdmin() ? '<button class="proj-card add" onclick="openPkg()">+ פרויקט חדש</button>' : ''}</div>
+    ${!packages.length && !isAdmin() ? '<div class="empty">המנהל עוד לא יצר פרויקט.</div>' : ''}`;
+}
+function openProject(id) { view = 'pkg'; select(id); render(); window.scrollTo(0, 0); }
 
 // ---------- month board of finished episodes ----------
 let calMonth = today().slice(0, 7), calSel = today();
@@ -883,7 +942,7 @@ $('pkgList').addEventListener('click', ev => {
   view = 'pkg'; select(b.dataset.id); render();
 });
 $('newPkgBtn').onclick = () => openPkg();
-$('catBtn').onclick = () => openCats();
+$('logoBtn').onclick = () => { view = 'home'; render(); window.scrollTo(0, 0); };
 $('calBtn').onclick = () => { view = view === 'calendar' ? 'pkg' : 'calendar'; render(); };
 window.addEventListener('hashchange', () => location.reload());
 setInterval(() => { if (loaded && !$('modalRoot').innerHTML) render(); }, 60000);
