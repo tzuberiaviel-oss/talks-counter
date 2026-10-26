@@ -347,6 +347,89 @@
     .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
     .day-detail { padding-bottom: 18px; }
   }
+  /* Money: per-package card, project table, rail scope */
+  .money { margin: 4px 0 22px; padding: 16px; border-radius: 18px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.06); display: grid; gap: 12px; }
+  .money-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .money-head h2 { margin: 0; }
+  .money .add, .tbl-foot .add { color: var(--orange); }
+  .m-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 560px) { .m-stats { grid-template-columns: 1fr 1fr; } }
+  .m-stats div, .rail-stats div { background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 9px 11px; display: grid; gap: 1px; min-width: 0; }
+  .m-stats span { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .m-stats b { font-family: var(--font-display); font-size: 19px; font-weight: 500; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .m-stats .ok b, .rail-stats .ok b { color: var(--orange); }
+  .m-stats .due b, .rail-stats .due b { color: var(--ink); }
+  .paid-bar { height: 6px; }
+  .pays { list-style: none; margin: 0; padding: 0; }
+  .pays li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; align-items: center; gap: 10px; padding: 7px 0; border-top: 1px solid rgba(255,255,255,.07); font-size: 14px; }
+  .pays .pn { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pays b { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .pays .ghost { font-size: 13px; padding: 3px 8px; }
+  @media (max-width: 520px) { .pays li { grid-template-columns: auto minmax(0, 1fr) auto; } .pays li .ghost { display: none; } .pays li { cursor: pointer; } }
+  .tbl-wrap { overflow-x: auto; margin: 0 -4px; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; min-width: 460px; }
+  .tbl th { font-size: 12px; color: var(--muted); font-weight: 600; text-align: start; padding: 4px 6px 8px; }
+  .tbl td { padding: 9px 6px; border-top: 1px solid rgba(255,255,255,.07); white-space: nowrap; }
+  .tbl tbody tr { cursor: pointer; }
+  .tbl tbody tr:hover td { background: rgba(255,255,255,.03); }
+  .tbl td.nm { font-weight: 600; white-space: normal; }
+  .tbl td.ok { color: var(--orange); }
+  .tbl tfoot td { font-weight: 700; border-top: 1px solid rgba(255,255,255,.18); }
+  .tbl .kind { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
+  .type-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .type-pick .cat-opt span { width: 100%; justify-content: center; text-align: center; border-radius: 14px; padding: 10px 8px; flex-direction: column; gap: 0; }
+  .type-pick .cat-opt span small { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .calc { margin-top: 12px; padding: 10px 13px; border-radius: 12px; background: var(--orange-soft); color: #ffc9a3; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .calc b { color: var(--orange); }
+  .pkg .badge.due { color: var(--muted); background: var(--glass); border-color: var(--hair); }
+  .pc-money { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .pc-money b { color: var(--orange); font-weight: 600; }
+  .rail-scope { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+  .rail-scope b { font-family: var(--font-display); font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rail-stats.three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .rail-stats.three b { font-size: 17px; }
+  .d-arc-in { animation: arc-in .9s cubic-bezier(.65,0,.35,1) both; }
+  @keyframes arc-in { from { stroke-dasharray: 0 400; } }
+
+  /* Line chart (ported from the chart-line component): dotted area, smooth line, pulsing last point, crosshair */
+  .chart { grid-template-columns: minmax(0, 1fr); }
+  .lc { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; min-width: 0; }
+  .lc-head { display: flex; align-items: center; gap: 10px; }
+  .lc-ic { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: var(--orange-soft); color: var(--orange); flex: none; }
+  .lc-ic svg { width: 14px; height: 14px; }
+  .lc-tt h3 { font-size: 15px; }
+  .lc-tt .small { font-size: 12.5px; }
+  .lc-val { display: flex; align-items: center; gap: 10px; }
+  .lc-num { font-family: var(--font-display); font-size: 30px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .lc-delta { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; color: #32d74b; background: rgba(50,215,75,.12); font-variant-numeric: tabular-nums; direction: ltr; }
+  .lc-delta.down { color: #ff6961; background: rgba(255,69,58,.12); }
+  .lc-plot { position: relative; width: 100%; min-width: 0; touch-action: pan-y; user-select: none; -webkit-user-select: none; border-radius: 8px; direction: ltr; }
+  .lc-plot:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
+  .lc-plot svg { display: block; overflow: visible; }
+  .lc-plot text { font-family: var(--font); font-variant-numeric: tabular-nums; }
+  .lc-fade { animation: lc-fade .5s ease both; }
+  @keyframes lc-fade { from { opacity: 0; } }
+  .lc-line.anim { stroke-dasharray: 1; animation: lc-draw 1.2s cubic-bezier(.65,0,.35,1) var(--d, 0s) both; }
+  @keyframes lc-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  .lc-pop { transform-box: fill-box; transform-origin: center; }
+  .lc-pop.anim { animation: lc-pop .55s cubic-bezier(.34,1.56,.64,1) var(--d, 0s) both; }
+  @keyframes lc-pop { from { transform: scale(0); } }
+  .lc-pulse { transform-box: fill-box; transform-origin: center; opacity: 0; animation: lc-pulse 1.8s ease-out var(--d, 0s) infinite; }
+  @keyframes lc-pulse { from { transform: scale(1); opacity: .35; } to { transform: scale(2.4); opacity: 0; } }
+  .lc-cross, .lc-dot { transition: opacity .15s; }
+  .lc-tip { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 6; direction: rtl; min-width: 130px;
+    background: var(--tip-bg); border: 1px solid var(--hair); border-radius: 12px; padding: 8px 11px; box-shadow: 0 10px 30px rgba(0,0,0,.5); font-size: 12.5px; }
+  .lc-tip .tt { font-weight: 600; margin-bottom: 4px; }
+  .lc-tip .tr { display: flex; align-items: center; gap: 7px; }
+  .lc-tip .tr i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .lc-tip .tr span { color: var(--muted); flex: 1; }
+  .lc-tip .tr b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .lc-legend { display: flex; flex-wrap: wrap; gap: 6px; }
+  .lc-key { font-size: 12.5px; padding: 4px 11px; gap: 7px; }
+  .lc-key i { width: 9px; height: 9px; border-radius: 3px; }
+  .lc-key.off { opacity: .45; }
+  .lc-key.off i { background: transparent !important; outline: 1.5px solid var(--faint); }
+  @media (prefers-reduced-motion: reduce) { .lc-line.anim, .lc-pop.anim, .lc-fade, .d-arc-in { animation: none; } .lc-pulse { display: none; } }
   @media (prefers-reduced-motion: reduce) { .tip.glide, .tbody, .bar > i, button { transition: none; } }
 </style>
 </head>
@@ -392,7 +475,7 @@ const I = {
   undo: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg>'
 };
 const token = decodeURIComponent(location.hash.slice(1));
-let fin = { bundles: {}, packages: {} }, packages = [], episodes = [], categories = [], bundles = [], lastSnap = '', loaded = false, linkError = null, offline = false;
+let fin = { bundles: {}, payments: [], packages: {} }, packages = [], episodes = [], categories = [], bundles = [], lastSnap = '', loaded = false, linkError = null, offline = false;
 let view = 'home', selectedId = null;
 const store = {
   get(k) { try { return localStorage.getItem('pc-' + k); } catch (e) { return null; } },
@@ -440,28 +523,39 @@ function inkOn(hex) {  // black text on light colors, white on dark ones
 }
 const catVars = hex => `--c:${hex};--c-ink:${inkOn(hex)}`;
 const catTag = e => { const c = catOf(e); return c ? `<span class="cat-tag" style="${catVars(c.color)}">${esc(c.name)}</span>` : ''; };
-// Paid status: only the admin can change it; everyone sees it
+// Paid status: a package's payments cover its first episodes. Everyone sees it; only the admin records payments.
 function payChip(e) {
-  if (inBundle(e) || e.paid) return '';  // paid by its package (shown on the package heading) or marked paid
-  const label = 'לא שולם';
-  return isAdmin()
-    ? `<button class="pay-chip ${e.paid ? 'paid' : ''}" onclick="togglePaid('${esc(e.id)}')" title="לחיצה משנה">${label}</button>`
-    : `<span class="pay-chip ${e.paid ? 'paid' : ''}">${label}</span>`;
+  if (paidOf(e)) return '';
+  return isAdmin() && e.bundle
+    ? `<button class="pay-chip" onclick="payEpisode('${esc(e.id)}')" title="רישום תשלום על פרק אחד">לא שולם</button>`
+    : `<span class="pay-chip">לא שולם</span>`;
 }
-async function togglePaid(id) {
-  const e = episodes.find(x => x.id === id); if (!e) return;
-  await write('pc_set_paid', { p_id: id, p_paid: !e.paid }, e.paid ? 'סומן כלא שולם' : 'סומן כשולם');
+async function payEpisode(id) {
+  const b = bundleOf(episodes.find(x => x.id === id)); if (!b) return;
+  const price = priceOf(b);
+  if (!price) { toast('קודם צריך להגדיר מחיר לפרק בחבילה'); return openBundle(b.id); }
+  await write('pc_save_payment', { p_id: null, p_bundle_id: b.id, p_amount: price, p_paid_on: today(), p_note: 'תשלום על פרק' }, `נרשם תשלום של ${money(price)}`);
 }
 const fmtDay = d => new Date(d + 'T00:00').toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
 const current = () => packages.find(p => p.id === selectedId);
 // Episodes in the order they were marked: number 1 is the first marked, the newest is last (and on top of lists)
-const epsOf = id => episodes.filter(e => e.pkg === id).sort((a, b) => (a.at || '').localeCompare(b.at || ''));
-// Prepaid packages ("חבילות") inside a project: episodes fill them in order and count as paid
-const bundlesOf = id => bundles.filter(b => b.pkg === id).sort((a, b) => (a.at || '').localeCompare(b.at || ''));
-const capOf = p => bundlesOf(p.id).reduce((s, b) => s + b.size, 0);
-const pct = p => capOf(p) ? Math.min(100, Math.round(epsOf(p.id).length / capOf(p) * 100)) : 0;
-const inBundle = e => { const p = packages.find(x => x.id === e.pkg); return !!p && epsOf(p.id).indexOf(e) < capOf(p); };
-const paidOf = e => e.paid || inBundle(e);
+const byAt = (a, b) => (a.at || '').localeCompare(b.at || '');
+const epsOf = id => episodes.filter(e => e.pkg === id).sort(byAt);
+// Packages ("חבילות") inside a project: fixed (size = number of episodes) or open (size null, a counter with no limit).
+// Each episode belongs to one package; the package's payments cover its first episodes (paidEps of them).
+const bundlesOf = id => bundles.filter(b => b.pkg === id).sort(byAt);
+const epsIn = bid => episodes.filter(e => e.bundle === bid).sort(byAt);
+const bundleOf = e => e && e.bundle ? bundles.find(b => b.id === e.bundle) || null : null;
+const capOf = p => bundlesOf(p.id).reduce((s, b) => s + (b.size || 0), 0);
+const isOpen = p => !bundlesOf(p.id).length || bundlesOf(p.id).some(b => b.size == null);
+const pct = p => capOf(p) && !isOpen(p) ? Math.min(100, Math.round(epsOf(p.id).length / capOf(p) * 100)) : 0;
+const paidOf = e => { const b = bundleOf(e); return b ? epsIn(b.id).indexOf(e) < b.paidEps : !!e.paid; };
+// Where a new episode goes (same rule as the server): the first fixed package with room, else the newest open one
+function autoBundle(p) {
+  const list = bundlesOf(p.id);
+  return list.find(b => b.size != null && epsIn(b.id).length < b.size) || [...list].reverse().find(b => b.size == null) || null;
+}
+const sizeText = b => b.size == null ? 'חבילה פתוחה' : b.size === 1 ? 'פרק אחד' : b.size + ' פרקים';
 const epName = (e, n) => e.title || (e.guest ? 'פרק עם ' + e.guest : 'פרק ' + n);
 let selBundle = null;  // inside a project: null = whole project, a package id, or 'out' (episodes outside the packages)
 function select(id) { if (id !== selectedId) selBundle = null; selectedId = id; store.set('selected', id); }
@@ -493,8 +587,8 @@ async function load() {
     const s = await rpc('pc_state', { p_token: token });
     packages = s.packages.map(p => ({ ...p, guests: p.guests || [] }));
     categories = s.categories || [];
-    bundles = (s.bundles || []).map(b => ({ id: b.id, pkg: b.package_id, size: b.size, note: b.note, at: b.created_at }));
-    episodes = s.episodes.map(e => ({ id: e.id, pkg: e.package_id, cat: e.category_id || null, paid: !!e.paid, guest: e.guest, title: e.title, date: e.date, note: e.note, by: e.by_name, at: e.created_at }));
+    bundles = (s.bundles || []).map(b => ({ id: b.id, pkg: b.package_id, size: b.size, note: b.note, at: b.created_at, paidEps: b.paid_eps || 0 }));
+    episodes = s.episodes.map(e => ({ id: e.id, pkg: e.package_id, bundle: e.bundle_id || null, cat: e.category_id || null, paid: !!e.paid, guest: e.guest, title: e.title, date: e.date, note: e.note, by: e.by_name, at: e.created_at }));
     const snap = JSON.stringify(s);
     const changed = snap !== lastSnap || !loaded || offline;
     lastSnap = snap; loaded = true; offline = false; linkError = null;
@@ -583,8 +677,8 @@ function render() {
     : packages.length ? packages.map(p => `
       <button class="pkg" data-id="${esc(p.id)}">
         <div class="nm">${esc(p.client)}</div>
-        <div class="sub">${capOf(p) ? `${epsOf(p.id).length} / ${capOf(p)} · ${pct(p)}%` : `${epsOf(p.id).length === 1 ? 'פרק אחד' : epsOf(p.id).length + ' פרקים'} · פתוח`}</div>
-        ${capOf(p) ? `<div class="mini-bar"><i style="width:${pct(p)}%"></i></div>` : ''}
+        <div class="sub">${!isOpen(p) ? `${epsOf(p.id).length} / ${capOf(p)} · ${pct(p)}%` : `${epsOf(p.id).length === 1 ? 'פרק אחד' : epsOf(p.id).length + ' פרקים'}`}</div>
+        ${!isOpen(p) ? `<div class="mini-bar"><i style="width:${pct(p)}%"></i></div>` : ''}
       </button>`).join('') : '<div class="small">עדיין אין פרויקטים</div>';
 
   const main = $('main');
@@ -601,28 +695,29 @@ function render() {
   const p = current();
   if (!p) { view = 'home'; return render(); }
 
-  // What this screen shows: the whole project, one package, or the episodes outside the packages
+  // What this screen shows: the whole project, one package, or episodes without a package
   const { secs, rest, eps } = sections(p);
   const sec = secs.find(s => s.key === selBundle) || null;
   if (selBundle && selBundle !== 'out' && !sec) selBundle = null;
   const scope = sec ? 'bundle' : selBundle === 'out' ? 'out' : 'all';
-  const cap = scope === 'bundle' ? sec.size : scope === 'out' ? 0 : capOf(p);
+  const cap = scope === 'bundle' ? sec.size || 0 : scope === 'out' || isOpen(p) ? 0 : capOf(p);
   const items = scope === 'bundle' ? sec.items : scope === 'out' ? rest : eps.map((e, i) => ({ e, i }));
   const done = items.length, open = !cap, left = open ? 0 : Math.max(0, cap - done);
   const paidN = items.filter(x => paidOf(x.e)).length, unpaidN = done - paidN;
-  const over = scope === 'all' && cap ? Math.max(0, done - cap) : 0;
+  const over = cap ? Math.max(0, done - cap) : 0;
   const pctHere = cap ? Math.min(100, Math.round(done / cap * 100)) : 0;
-  const first = scope === 'bundle' ? sec.start : 0;
+  // Inside a package the squares count 1..size of that package; elsewhere they carry the project's episode number
+  const local = scope === 'bundle';
   const dots = Array.from({ length: open ? done : Math.max(cap, done) }, (_, j) => {
     const x = items[j];
-    return x ? `<div class="dot on ${paidOf(x.e) ? '' : 'unpaid'}" data-i="${x.i}" tabindex="0" style="${catVars(colorOf(x.e))}">${x.i + 1}</div>`
-             : `<div class="dot">${first + j + 1}</div>`;
+    return x ? `<div class="dot on ${paidOf(x.e) ? '' : 'unpaid'}" data-i="${x.i}" tabindex="0" style="${catVars(colorOf(x.e))}">${local ? j + 1 : x.i + 1}</div>`
+             : `<div class="dot">${j + 1}</div>`;
   }).join('');
   const usedCats = catsOf(p.id).map(c => ({ c, n: items.filter(x => x.e.cat === c.id).length })).filter(x => x.n);
   const noCat = items.filter(x => !catOf(x.e)).length;
   const legend = catsOf(p.id).length && done ? `<div class="legend">${usedCats.map(x =>
       `<span><i style="background:${x.c.color}"></i>${esc(x.c.name)} <b>${x.n}</b></span>`).join('')}${noCat ? `<span><i class="none"></i>ללא שיוך <b>${noCat}</b></span>` : ''}</div>` : '';
-  const payLegend = done && scope !== 'bundle' ? `<div class="legend pay-legend"><span><i class="sq"></i>שולם <b>${paidN}</b></span><span><i class="sq hollow"></i>לא שולם <b>${unpaidN}</b></span>${over ? `<span>מעבר לחבילות <b>${over}</b></span>` : ''}</div>` : '';
+  const payLegend = done ? `<div class="legend pay-legend"><span><i class="sq"></i>שולם <b>${paidN}</b></span><span><i class="sq hollow"></i>לא שולם <b>${unpaidN}</b></span>${over ? `<span>מעבר לחבילה <b>${over}</b></span>` : ''}</div>` : '';
 
   const row = ({ e, i }) => `
     <li>
@@ -640,24 +735,29 @@ function render() {
       </div>
     </li>`;
   const newestFirst = list => [...list].reverse().map(row).join('');
-  // Whole project: newest first, under a heading per package (the payment mark sits on the heading)
+  const grpChip = list => { const n = list.filter(x => paidOf(x.e)).length;
+    return n === list.length ? '<span class="pay-chip paid">שולם</span>' : `<span class="pay-chip">שולם ${n} מתוך ${list.length}</span>`; };
+  // Whole project: newest package first, its episodes newest first, under a heading per package
   const list = scope !== 'all' || !secs.length ? newestFirst(items)
-    : (rest.length ? `<li class="grp"><span class="g-nm">מחוץ לחבילה</span><span class="small">שולם ${rest.filter(x => paidOf(x.e)).length} · לא שולם ${rest.filter(x => !paidOf(x.e)).length}</span></li>${newestFirst(rest)}` : '')
-      + [...secs].reverse().filter(s => s.items.length).map(s =>
-        `<li class="grp"><span class="g-nm">${esc(bName(s.b, s.k))}</span><span class="pay-chip paid">שולם מראש</span><span class="small">${s.items.length} / ${s.size}</span></li>${newestFirst(s.items)}`).join('');
+    : [...secs].reverse().filter(s => s.items.length).map(s =>
+        `<li class="grp"><span class="g-nm">${esc(bName(s.b, s.k))}</span>${grpChip(s.items)}<span class="small">${s.size ? `${s.items.length} / ${s.size}` : s.items.length + ' פרקים'}</span></li>${newestFirst(s.items)}`).join('')
+      + (rest.length ? `<li class="grp"><span class="g-nm">בלי חבילה</span>${grpChip(rest)}</li>${newestFirst(rest)}` : '');
 
-  const sub = scope === 'bundle' ? `${esc(bName(sec.b, sec.k))} · ${sec.size} פרקים${isAdmin() && fin.bundles[sec.b.id]?.price != null ? ' · ' + money(fin.bundles[sec.b.id].price) : ''}`
-    : scope === 'out' ? (secs.length ? 'פרקים מחוץ לחבילות' : 'פרויקט פתוח, בלי חבילה')
-    : open ? 'פרויקט פתוח, בלי חבילה' : `${secs.length === 1 ? 'חבילה אחת' : secs.length + ' חבילות'} · ${cap} פרקים${p.note ? ' · ' + esc(p.note) : ''}`;
+  const bPrice = scope === 'bundle' && isAdmin() && priceOf(sec.b) ? ` · ${money(priceOf(sec.b))} לפרק` : '';
+  const sub = scope === 'bundle' ? `${esc(bName(sec.b, sec.k))} · ${sizeText(sec.b)}${bPrice}`
+    : scope === 'out' ? 'פרקים שלא שייכים לאף חבילה'
+    : !secs.length ? 'עוד אין חבילות בפרויקט'
+    : `${secs.length === 1 ? 'חבילה אחת' : secs.length + ' חבילות'}${cap ? ` · ${cap} פרקים` : ''}${p.note ? ' · ' + esc(p.note) : ''}`;
   const actions = !isAdmin() ? '' : scope === 'bundle'
     ? `<div class="row head-actions"><button onclick="openBundle('${esc(sec.b.id)}')">עריכת חבילה</button><button class="ghost danger" onclick="delBundle('${esc(sec.b.id)}')">מחיקה</button></div>`
-    : scope === 'all' ? `<div class="row head-actions"><button onclick="openCats()">שיוכים</button><button onclick="openPkg('${esc(p.id)}')">עריכת פרויקט</button>
+    : scope === 'all' ? `<div class="row head-actions"><button onclick="openBundle()">+ חבילה</button><button onclick="openCats()">שיוכים</button><button onclick="openPkg('${esc(p.id)}')">עריכת פרויקט</button>
         <button class="ghost danger" onclick="delPkg()">מחיקה</button></div>` : '';
+  const moneyHtml = !isAdmin() ? '' : scope === 'bundle' ? moneyCard(sec.b) : scope === 'all' ? moneyTable(p) : '';
 
   main.innerHTML = `
     <div class="head">
       <div style="min-width:0">
-        <h1>${esc(p.client)}${scope === 'bundle' ? ` <span class="pay-chip paid big-chip">שולם מראש</span>` : ''}</h1>
+        <h1>${esc(p.client)}</h1>
         <div class="small">${sub}</div>
         ${scope === 'all' && p.guests.length ? `<div class="small">מוזמנים: <span dir="ltr">${p.guests.map(esc).join(', ')}</span></div>` : ''}
       </div>
@@ -681,11 +781,11 @@ function render() {
     <div class="row action-bar">
       <button class="primary big" onclick="openEp()">${I.check}סיימתי פרק</button>
       <button onclick="undoLast()" ${canChange(lastMarked(p.id)) ? '' : 'disabled'}>${I.undo}ביטול אחרון</button></div>
-    <h2>${scope === 'bundle' ? 'הפרקים בחבילה' : scope === 'out' ? 'פרקים מחוץ לחבילה' : 'פרקים שנגמרו'}</h2>
+    ${moneyHtml}
+    <h2>${scope === 'bundle' ? 'הפרקים בחבילה' : scope === 'out' ? 'פרקים בלי חבילה' : 'פרקים שנגמרו'}</h2>
     ${done ? `<ul class="eps">${list}</ul>` : '<div class="small">עוד לא סומן אף פרק.</div>'}
     <div class="tip" id="tip"><div class="bubble"><div class="tbody"></div></div></div>`;
   tipIndex = null;
-  renderRail();
 }
 
 function calUrl(p, e, n) {
@@ -693,7 +793,7 @@ function calUrl(p, e, n) {
   const name = e.title || (e.guest ? 'עם ' + e.guest : '');
   const params = { action: 'TEMPLATE', text: `פרק ${n}${name ? ' – ' + name : ''} · ${p.client}`,
     dates: `${ymd(e.date || today())}/${ymd(addDays(e.date || today(), 1))}`,
-    details: [capOf(p) ? `פרק ${n} מתוך ${capOf(p)} בפרויקט "${p.client}"` : `פרק ${n} בפרויקט "${p.client}"`, e.note].filter(Boolean).join('\n') };
+    details: [!isOpen(p) ? `פרק ${n} מתוך ${capOf(p)} בפרויקט "${p.client}"` : `פרק ${n} בפרויקט "${p.client}"`, e.note].filter(Boolean).join('\n') };
   if (p.guests.length) params.add = p.guests.join(',');
   return 'https://calendar.google.com/calendar/render?' + new URLSearchParams(params);
 }
@@ -715,7 +815,7 @@ function showTip(i, cell) {
   lines.className = 'tlines';
   lines.innerHTML = `<span class="tp">${esc(epName(e, n))}</span>
     ${catOf(e) ? `<span class="ts"><i class="tdot" style="background:${colorOf(e)}"></i>${esc(catOf(e).name)}</span>` : ''}
-    <span class="ts">${capOf(p) ? `פרק ${n} מתוך ${capOf(p)}` : `פרק ${n}`} · ${fmtDate(e.date)} · ${paidOf(e) ? 'שולם' : 'לא שולם'}</span>
+    <span class="ts">${!isOpen(p) ? `פרק ${n} מתוך ${capOf(p)}` : `פרק ${n}`} · ${fmtDate(e.date)} · ${paidOf(e) ? 'שולם' : 'לא שולם'}</span>
     ${e.by ? `<span class="ts">סימן: ${esc(e.by)} · ${fmtWhen(e.at)}</span>` : ''}
     ${e.note ? `<span class="tn">${esc(e.note)}</span>` : ''}`;
   body.appendChild(lines);
@@ -758,18 +858,46 @@ function ask(text, yes) {
   });
 }
 
-// ---------- packages ----------
+// ---------- projects and packages ----------
+// Fixed (number of episodes) or open (a counter with no limit), with a price per episode; shows the package total as you type
+function bundleFields(b) {
+  const f = b ? fin.bundles[b.id] || {} : {}, open = b ? b.size == null : false;
+  return `<label>סוג החבילה</label>
+    <div class="cat-pick type-pick" role="radiogroup">
+      <label class="cat-opt"><input type="radio" name="kind" value="fixed" ${open ? '' : 'checked'}><span>מספר פרקים קבוע<small>למשל 10 פרקים</small></span></label>
+      <label class="cat-opt"><input type="radio" name="kind" value="open" ${open ? 'checked' : ''}><span>פתוחה<small>מונה בלי הגבלה</small></span></label>
+    </div>
+    <div id="sizeBox" ${open ? 'hidden' : ''}>
+      <label for="f-bsize">כמה פרקים בחבילה</label>
+      <input id="f-bsize" name="size" type="number" min="1" max="10000" value="${b && b.size ? b.size : 10}">
+    </div>
+    <label for="f-bprice">מחיר לפרק (₪)</label>
+    <input id="f-bprice" name="price" type="number" min="0" step="any" inputmode="decimal" placeholder="למשל 450" value="${f.price != null ? f.price : ''}">
+    <div class="calc" id="calc"></div>`;
+}
+function wireBundleFields(form) {
+  const upd = () => {
+    const open = form.kind.value === 'open', size = parseInt(form.size.value, 10) || 0, price = Number(form.price.value) || 0;
+    $('sizeBox').hidden = open; form.size.required = !open;
+    $('calc').innerHTML = !price ? 'בלי מחיר לפרק אי אפשר לחשב כמה שולם וכמה נשאר.'
+      : open ? `<b>${money(price)}</b> לכל פרק. הסכום יגדל עם כל פרק שמסומן.`
+      : `סה״כ החבילה: <b>${money(price * size)}</b> (${size} × ${money(price)})`;
+  };
+  form.addEventListener('input', upd); form.addEventListener('change', upd); upd();
+}
+const readBundle = f => ({ size: f.kind.value === 'open' ? null : Math.min(10000, Math.max(1, parseInt(f.size.value, 10) || 1)),
+  price: f.price.value === '' ? null : Math.max(0, Number(f.price.value)) });
 function openPkg(id) {
   const p = packages.find(x => x.id === id);
   openModal(`<form id="pkgForm">
     <h3>${p ? 'עריכת פרויקט' : 'פרויקט חדש'}</h3>
     <label for="f-client">שם הלקוח / הפרויקט</label>
     <input id="f-client" name="client" required placeholder="למשל: הפודקאסט של דנה" value="${esc(p?.client || '')}">
-    ${p ? '' : `<label for="f-total">חבילה שנקנתה מראש (מספר פרקים, לא חובה)</label>
-    <input id="f-total" name="total" type="number" min="1" max="10000" placeholder="למשל 60. ריק = פרויקט פתוח">
-    <div class="small">אפשר להוסיף עוד חבילות בכל רגע מתוך הפרויקט.</div>`}
-    <label for="f-eprice">מחיר לפרק מחוץ לחבילות (₪, לא חובה)</label>
-    <input id="f-eprice" name="eprice" type="number" min="0" step="1" inputmode="numeric" placeholder="למשל 450" value="${p && fin.packages[p.id] != null ? fin.packages[p.id] : ''}">
+    ${p ? '' : `<h2 style="margin:22px 0 0">החבילה הראשונה</h2>
+    <label for="f-bnote">שם החבילה (לא חובה)</label>
+    <input id="f-bnote" name="bnote" maxlength="200" placeholder="למשל: חבילת פתיחה">
+    ${bundleFields(null)}
+    <div class="small" style="margin-top:8px">אפשר להוסיף עוד חבילות בכל רגע מתוך הפרויקט.</div>`}
     <label for="f-note">הערה (לא חובה)</label>
     <input id="f-note" name="note" placeholder="למשל: תאריך התחלה" value="${esc(p?.note || '')}">
     <label for="f-guests">מוזמנים לאירועים ביומן (לא חובה)</label>
@@ -777,57 +905,86 @@ function openPkg(id) {
     <div class="small">יתווספו לכל "הוסף ליומן" של הפרויקט</div>
     <div class="actions"><button class="primary">שמירה</button><button type="button" onclick="closeModal()">ביטול</button></div>
   </form>`);
+  if (!p) wireBundleFields($('pkgForm'));
   $('f-client').focus();
   $('pkgForm').onsubmit = async ev => {
     ev.preventDefault();
     const f = ev.target;
     const args = { p_id: p ? p.id : null, p_client: f.client.value.trim(), p_total: null,
       p_note: f.note.value.trim(), p_guests: f.guests.value.split(/[\s,;]+/).filter(g => g.includes('@')) };
+    const first = p ? null : { ...readBundle(f), note: f.bnote.value.trim() };
     closeModal();
-    const firstBundle = !p && parseInt(f.total.value, 10) > 0 ? Math.min(10000, parseInt(f.total.value, 10)) : 0;
-    const eprice = f.eprice.value === '' ? null : Math.max(0, Number(f.eprice.value));
-    const before = new Set(packages.map(x => x.id));
     const res = await write('pc_save_package', args, p ? 'הפרויקט עודכן' : 'הפרויקט נוצר');
-    if (!res) return;
-    if (eprice !== (p ? fin.packages[p.id] ?? null : null)) await write('pc_set_project_price', { p_id: res.id, p_price: eprice });
-    if (!p) {
-      const created = packages.find(x => !before.has(x.id));
-      if (created) {
-        view = 'pkg'; select(created.id); render();
-        if (firstBundle) await write('pc_save_bundle', { p_id: null, p_package_id: created.id, p_size: firstBundle, p_note: '' });
-      }
-    }
-    loadFinance();
+    if (!res || p) return;
+    view = 'pkg'; select(res.id); render();
+    const b = await write('pc_save_bundle', { p_id: null, p_package_id: res.id, p_size: first.size, p_note: first.note });
+    if (b) await write('pc_set_bundle_price', { p_id: b.id, p_ep_price: first.price, p_start: today() });
   };
 }
 function openBundle(id) {
   const p = current(), b = bundles.find(x => x.id === id);
   openModal(`<form id="bundleForm">
-    <h3>${b ? 'עריכת חבילה' : 'חבילה חדשה'}</h3>
-    <div class="small" style="margin-top:6px">חבילה שהלקוח קנה מראש. הפרקים ממלאים את החבילות לפי הסדר, ופרק שנכנס לחבילה נחשב שולם.</div>
-    <label for="f-bsize">כמה פרקים בחבילה</label>
-    <input id="f-bsize" name="size" type="number" min="1" max="10000" required value="${b ? b.size : 30}">
+    <h3>${b ? 'עריכת חבילה' : 'חבילה חדשה'} · ${esc(p.client)}</h3>
     <label for="f-bnote">שם החבילה (לא חובה)</label>
     <input id="f-bnote" name="note" maxlength="200" placeholder="למשל: חבילת פתיחה" value="${esc(b?.note || '')}">
-    <label for="f-bprice">מחיר החבילה (₪, לא חובה)</label>
-    <input id="f-bprice" name="price" type="number" min="0" step="1" inputmode="numeric" placeholder="למשל 12000" value="${b && fin.bundles[b.id]?.price != null ? fin.bundles[b.id].price : ''}">
-    <label for="f-bdate">תאריך הקנייה</label>
-    <input id="f-bdate" name="bought" type="date" value="${(b && fin.bundles[b.id]?.bought_on) || today()}">
+    ${bundleFields(b)}
+    <label for="f-bdate">תאריך התחלה</label>
+    <input id="f-bdate" name="start" type="date" value="${(b && fin.bundles[b.id]?.start) || today()}">
     <div class="actions"><button class="primary">שמירה</button><button type="button" onclick="closeModal()">ביטול</button></div>
   </form>`);
-  $('f-bsize').focus();
+  wireBundleFields($('bundleForm'));
+  $('f-bnote').focus();
   $('bundleForm').onsubmit = async ev => {
     ev.preventDefault();
-    const f = ev.target, size = Math.min(10000, Math.max(1, parseInt(f.size.value, 10) || 1)), note = f.note.value.trim();
-    const price = f.price.value === '' ? null : Math.max(0, Number(f.price.value)), bought = f.bought.value || today();
+    const f = ev.target, { size, price } = readBundle(f), note = f.note.value.trim(), start = f.start.value || today();
+    if (b && size != null && size < epsIn(b.id).length && !await ask(`בחבילה כבר ${epsIn(b.id).length} פרקים, יותר מ-${size}. לשמור בכל זאת?`, 'שמירה')) return;
     closeModal();
     const res = await write('pc_save_bundle', { p_id: b ? b.id : null, p_package_id: p.id, p_size: size, p_note: note }, b ? 'החבילה עודכנה' : 'החבילה נוספה');
-    if (res) { await write('pc_set_bundle_money', { p_id: res.id, p_price: price, p_bought_on: bought }); loadFinance(); }
+    if (res) await write('pc_set_bundle_price', { p_id: res.id, p_ep_price: price, p_start: start });
+    if (res && !b) { selBundle = res.id; render(); }
   };
 }
 async function delBundle(id) {
-  if (!await ask('למחוק את החבילה? הפרקים לא יימחקו, אבל פרקים שהיו בתוכה יחזרו להיות מסומנים לפי התשלום שלהם.', 'מחיקה')) return;
-  await write('pc_delete_bundle', { p_id: id }, 'החבילה נמחקה');
+  const n = epsIn(id).length;
+  if (!await ask(`למחוק את החבילה ואת התשלומים שלה?${n ? ` ${n === 1 ? 'הפרק שבה לא יימחק' : `${n} הפרקים שבה לא יימחקו`} ויעברו ל"בלי חבילה".` : ''}`, 'מחיקה')) return;
+  if (await write('pc_delete_bundle', { p_id: id }, 'החבילה נמחקה')) { selBundle = null; render(); }
+}
+// Payments (admin): amount and date; the package's paid episodes follow the total paid
+function openPayment(bid, pid) {
+  const b = bundles.find(x => x.id === bid), x = fin.payments.find(y => y.id === pid), m = bMoney(b);
+  const suggest = x ? x.amount : m.price ? (b.size == null ? m.owed || m.price : Math.min(m.left || m.price, m.price)) : '';
+  openModal(`<form id="payForm">
+    <h3>${x ? 'עריכת תשלום' : 'תשלום חדש'} · ${esc(bName(b, bundlesOf(b.pkg).indexOf(b)))}</h3>
+    ${m.price ? `<div class="small" style="margin-top:6px">מחיר לפרק ${money(m.price)} · נשאר לתשלום ${money(b.size == null ? m.owed : m.left)}</div>` : ''}
+    <label for="f-amount">סכום (₪)</label>
+    <input id="f-amount" name="amount" type="number" min="1" step="any" inputmode="decimal" required value="${suggest}">
+    ${m.price ? `<div class="row" style="margin-top:8px">${[1, 2, 5].map(k => `<button type="button" class="chip" data-a="${m.price * k}">${k === 1 ? 'פרק אחד' : k + ' פרקים'}</button>`).join('')}
+      ${(b.size == null ? m.owed : m.left) ? `<button type="button" class="chip" data-a="${b.size == null ? m.owed : m.left}">כל היתרה</button>` : ''}</div>` : ''}
+    <label for="f-pdate">תאריך התשלום</label>
+    <input id="f-pdate" name="date" type="date" required value="${x ? x.date : today()}">
+    <label for="f-pnote">הערה (לא חובה)</label>
+    <input id="f-pnote" name="note" maxlength="200" placeholder="למשל: העברה בנקאית" value="${esc(x?.note || '')}">
+    <div class="actions"><button class="primary">שמירה</button><button type="button" onclick="closeModal()">ביטול</button></div>
+  </form>`);
+  $('payForm').addEventListener('click', ev => { const c = ev.target.closest('[data-a]'); if (c) $('f-amount').value = c.dataset.a; });
+  $('f-amount').focus();
+  $('payForm').onsubmit = async ev => {
+    ev.preventDefault();
+    const f = ev.target;
+    closeModal();
+    await write('pc_save_payment', { p_id: x ? x.id : null, p_bundle_id: b.id, p_amount: Number(f.amount.value), p_paid_on: f.date.value || today(), p_note: f.note.value.trim() },
+      x ? 'התשלום עודכן' : 'התשלום נרשם');
+  };
+}
+async function payAll(bid) {
+  const b = bundles.find(x => x.id === bid), m = bMoney(b), amount = b.size == null ? m.owed : m.left;
+  if (!amount || !await ask(`לרשום תשלום של ${money(amount)} על "${bName(b, bundlesOf(b.pkg).indexOf(b))}"?`, 'רישום תשלום')) return;
+  await write('pc_save_payment', { p_id: null, p_bundle_id: b.id, p_amount: amount, p_paid_on: today(), p_note: 'כל היתרה' }, 'החבילה סומנה כשולמה');
+}
+async function delPayment(id) {
+  const x = fin.payments.find(y => y.id === id);
+  if (!await ask(`למחוק את התשלום של ${money(x?.amount)}?`, 'מחיקה')) return;
+  await write('pc_delete_payment', { p_id: id }, 'התשלום נמחק');
 }
 async function delPkg() {
   const p = current();
@@ -838,19 +995,20 @@ async function delPkg() {
 // ---------- episodes ----------
 function openEp(id) {
   const p = current(), e = episodes.find(x => x.id === id);
-  // Payment (admin only): an episode that falls inside a prepaid package is paid by the package
-  const covered = e ? inBundle(e) : epsOf(p.id).length < capOf(p);
-  const payPick = !isAdmin() ? '' : covered
-    ? `<label>תשלום</label><div class="small">${e ? 'הפרק בתוך חבילה שנקנתה מראש, ולכן נחשב שולם.' : 'הפרק ייכנס לחבילה שנקנתה מראש וייחשב שולם אוטומטית.'}</div>`
-    : `<label>תשלום</label>
+  // Which package: chosen here when the project has more than one (default: the open package screen, else the usual rule)
+  const list = bundlesOf(p.id), here = list.find(b => b.id === selBundle);
+  const pick = e ? bundleOf(e) : here || autoBundle(p);
+  const bundlePick = list.length < 2 ? '' : `<label>חבילה</label>
     <div class="cat-pick" role="radiogroup">
-      <label class="cat-opt" style="--c:#32d74b"><input type="radio" name="paid" value="1" ${e && e.paid ? 'checked' : ''}><span><i></i>שולם</span></label>
-      <label class="cat-opt none"><input type="radio" name="paid" value="0" ${!e || !e.paid ? 'checked' : ''}><span>לא שולם</span></label>
+      ${list.map((b, k) => `<label class="cat-opt"><input type="radio" name="bundle" value="${esc(b.id)}" ${pick && pick.id === b.id ? 'checked' : ''}><span>${esc(bName(b, k))} <span class="small">${b.size == null ? epsIn(b.id).length + ' · פתוחה' : epsIn(b.id).length + '/' + b.size}</span></span></label>`).join('')}
     </div>`;
+  // Admin, new episode: record its payment right away
+  const payPick = e || !isAdmin() ? '' : `<label class="cat-opt" style="margin-top:14px;--c:#32d74b"><input type="checkbox" name="paynow"><span><i></i>הפרק שולם · לרשום תשלום</span></label>`;
   openModal(`<form id="epForm">
     <h3>${e ? 'עריכת פרק' : `פרק ${epsOf(p.id).length + 1} גמור`}</h3>
     <label for="f-guest">עם מי?</label>
     <input id="f-guest" name="guest" placeholder="למשל: שי" value="${esc(e?.guest || '')}">
+    ${bundlePick}
     ${catsOf(p.id).length ? `<label>שיוך</label>
     <div class="cat-pick" role="radiogroup">
       ${catsOf(p.id).map(c => `<label class="cat-opt" style="${catVars(c.color)}"><input type="radio" name="cat" value="${esc(c.id)}" ${(e ? e.cat === c.id : false) ? 'checked' : ''}><span><i></i>${esc(c.name)}</span></label>`).join('')}
@@ -869,13 +1027,20 @@ function openEp(id) {
   $('epForm').onsubmit = async ev => {
     ev.preventDefault();
     const f = ev.target;
+    const chosen = (f.querySelector('input[name=bundle]:checked') || {}).value || null, payNow = !!f.paynow?.checked;
     closeModal();
     if (!e && store.get('pin') && !store.get('who') && !await askName()) return;
-    const paidPick = f.querySelector('input[name=paid]:checked');
     const res = await write('pc_save_episode', { p_id: e ? e.id : null, p_package_id: p.id, p_guest: f.guest.value.trim(), p_title: f.title.value.trim(),
       p_date: f.date.value || today(), p_note: f.note.value.trim(), p_by_name: store.get('who') || '',
       p_category_id: (f.querySelector('input[name=cat]:checked') || {}).value || null }, e ? 'הפרק עודכן' : 'הפרק נוסף');
-    if (res && paidPick && (paidPick.value === '1') !== !!(e && e.paid)) await write('pc_set_paid', { p_id: res.id, p_paid: paidPick.value === '1' });
+    if (!res) return;
+    const saved = episodes.find(x => x.id === res.id);
+    if (chosen && saved && saved.bundle !== chosen) await write('pc_set_episode_bundle', { p_id: res.id, p_bundle_id: chosen });
+    const b = bundleOf(episodes.find(x => x.id === res.id));
+    if (payNow && b) {
+      if (priceOf(b)) await write('pc_save_payment', { p_id: null, p_bundle_id: b.id, p_amount: priceOf(b), p_paid_on: f.date.value || today(), p_note: 'תשלום על פרק' }, `נרשם תשלום של ${money(priceOf(b))}`);
+      else toast('לא נרשם תשלום: אין מחיר לפרק בחבילה');
+    }
   };
 }
 const lastMarked = id => [...epsOf(id)].sort((a, b) => (a.at || '').localeCompare(b.at || '')).pop();
@@ -934,21 +1099,31 @@ async function delCat(id) {
   if (await write('pc_delete_category', { p_id: id }, 'השיוך נמחק')) openCats();
 }
 
-// ---------- money and charts (admin only; prices come from pc_finance, never from the shared state) ----------
+// ---------- money (admin only; prices and payments come from pc_finance, never from the shared state) ----------
 const bName = (b, k) => b.note || `חבילה ${k + 1}`;
 const money = n => new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0 }).format(n || 0);
-// Project colors follow the project (creation order), never its rank; a 6th project and beyond fold into "אחר"
+const priceOf = b => (b && fin.bundles[b.id]?.price) || 0;
+const paysOf = bid => fin.payments.filter(x => x.bundle === bid);
+// Package total = price × size (fixed) or price × episodes done (open). owed = what the episodes already done are worth, minus what was paid.
+function bMoney(b) {
+  const price = priceOf(b), done = epsIn(b.id).length, total = price * (b.size ?? done);
+  const paid = paysOf(b.id).reduce((s, x) => s + x.amount, 0);
+  return { price, done, total, paid, left: Math.max(0, total - paid), owed: Math.max(0, price * done - paid) };
+}
+const sumMoney = list => list.map(bMoney).reduce((s, m) => ({ total: s.total + m.total, paid: s.paid + m.paid, left: s.left + m.left, owed: s.owed + m.owed }),
+  { total: 0, paid: 0, left: 0, owed: 0 });
 const PROJ_COLORS = ['#f05f00', '#0a84ff', '#b08c00', '#bf5af2', '#1fa84a'], OTHER = '#8e8e93';
 const projColor = p => PROJ_COLORS[packages.indexOf(p)] || OTHER;
-let finLoading = false, chartMetric = 'money', barMode = 'month';
+let finLoading = false, chartMetric = 'money';
 async function loadFinance() {
   if (finLoading || !isAdmin()) return;
   finLoading = true;
   try {
     const r = await rpc('pc_finance', { p_token: token, p_pin: store.get('pin') });
     if (r.ok) {
-      const next = { bundles: {}, packages: {} };
-      r.bundles.forEach(b => next.bundles[b.id] = { price: b.price == null ? null : Number(b.price), bought_on: b.bought_on });
+      const next = { bundles: {}, payments: [], packages: {} };
+      r.bundles.forEach(b => next.bundles[b.id] = { price: b.ep_price == null ? null : Number(b.ep_price), start: b.bought_on });
+      next.payments = (r.payments || []).map(x => ({ id: x.id, bundle: x.bundle_id, amount: Number(x.amount), date: x.paid_on, note: x.note, at: x.created_at }));
       r.packages.forEach(p => next.packages[p.id] = p.episode_price == null ? null : Number(p.episode_price));
       const changed = JSON.stringify(next) !== JSON.stringify(fin);
       fin = next;
@@ -957,87 +1132,129 @@ async function loadFinance() {
   } catch (e) {}
   finLoading = false;
 }
-// Income: each package on its purchase date, plus paid episodes outside packages at the project's episode price
-function incomeItems() {
-  const out = [];
-  bundles.forEach(b => { const f = fin.bundles[b.id]; if (f && f.price) out.push({ pkg: b.pkg, amount: f.price, date: f.bought_on || (b.at || '').slice(0, 10) }); });
-  episodes.forEach(e => { const price = fin.packages[e.pkg]; if (price && e.paid && !inBundle(e)) out.push({ pkg: e.pkg, amount: price, date: e.date }); });
-  return out;
+const leftOf = (b, m) => b.size == null ? m.owed : m.left;
+// One package: price, total, paid, left, and its payments
+function moneyCard(b) {
+  const m = bMoney(b), pays = paysOf(b.id), left = leftOf(b, m);
+  const share = m.total ? Math.min(100, Math.round(m.paid / m.total * 100)) : 0;
+  return `<section class="money">
+    <div class="money-head"><h2>כספים</h2><div class="row">
+      ${m.price && left ? `<button class="ghost add" onclick="payAll('${esc(b.id)}')">סימון הכל כשולם</button>` : ''}
+      <button class="ghost add" onclick="openPayment('${esc(b.id)}')">+ תשלום</button></div></div>
+    ${m.price ? `<div class="m-stats">
+      <div><span>מחיר לפרק</span><b>${money(m.price)}</b></div>
+      <div><span>${b.size == null ? 'סה״כ עד עכשיו' : 'סה״כ חבילה'}</span><b>${money(m.total)}</b></div>
+      <div class="ok"><span>שולם</span><b>${money(m.paid)}</b></div>
+      <div class="due"><span>נשאר לתשלום</span><b>${money(left)}</b></div></div>
+      <div class="bar paid-bar"><i style="width:${share}%"></i></div>
+      <div class="small">${m.total ? share + '% שולם' : 'עוד אין פרקים'}${b.size != null && m.owed ? ` · ${money(m.owed)} מתוכם על פרקים שכבר נעשו` : ''}${m.paid > m.total ? ` · יתרת זכות ${money(m.paid - m.total)}` : ''}</div>`
+    : `<div class="small">לחבילה הזו אין מחיר לפרק, לכן אין חישוב של כמה שולם וכמה נשאר. <button class="ghost add" onclick="openBundle('${esc(b.id)}')">הגדרת מחיר</button></div>`}
+    ${pays.length ? `<ul class="pays">${[...pays].reverse().map(x => `<li onclick="if(innerWidth<=520)openPayment('${esc(b.id)}','${esc(x.id)}')"><span class="nw">${fmtDate(x.date)}</span><span class="pn">${esc(x.note)}</span><b>${money(x.amount)}</b>
+      <button class="ghost" onclick="openPayment('${esc(b.id)}','${esc(x.id)}')">עריכה</button><button class="ghost danger" onclick="delPayment('${esc(x.id)}')">מחיקה</button></li>`).join('')}</ul>` : ''}
+  </section>`;
+}
+// Whole project: one row per package and a total row
+function moneyTable(p) {
+  const list = bundlesOf(p.id); if (!list.length) return '';
+  const rows = list.map((b, k) => { const m = bMoney(b);
+    return `<tr onclick="selBundle='${esc(b.id)}';render();window.scrollTo(0,0)"><td class="nm">${esc(bName(b, k))}<span class="kind">${b.size == null ? `פתוחה · ${m.done} פרקים` : `${m.done}/${b.size} פרקים`}</span></td>
+      <td>${m.price ? money(m.price) : '—'}</td><td>${m.price ? money(m.total) : '—'}</td><td class="ok">${money(m.paid)}</td><td>${m.price ? money(leftOf(b, m)) : '—'}</td></tr>`; }).join('');
+  const t = sumMoney(list), left = list.reduce((s, b) => s + leftOf(b, bMoney(b)), 0);
+  return `<section class="money">
+    <div class="money-head"><h2>כספים לפי חבילה</h2><button class="ghost add" onclick="openBundle()">+ חבילה</button></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>חבילה</th><th>מחיר לפרק</th><th>סה״כ</th><th>שולם</th><th>נשאר</th></tr></thead>
+      <tbody>${rows}</tbody>
+      ${list.length > 1 ? `<tfoot><tr><td>סה״כ</td><td></td><td>${money(t.total)}</td><td class="ok">${money(t.paid)}</td><td>${money(left)}</td></tr></tfoot>` : ''}</table></div>
+  </section>`;
+}
+
+// ---------- charts rail (follows the screen: all projects, one project, or one package) ----------
+function railScope() {
+  const p = view === 'pkg' ? current() : null;
+  if (!p) return { title: 'כל הפרויקטים', list: bundles, home: true };
+  const b = selBundle && selBundle !== 'out' ? bundles.find(x => x.id === selBundle && x.pkg === p.id) : null;
+  return b ? { title: `${p.client} · ${bName(b, bundlesOf(p.id).indexOf(b))}`, list: [b] } : { title: p.client, list: bundlesOf(p.id) };
 }
 function renderRail() {
   const rail = $('rail'), show = loaded && !linkError && isAdmin();
   rail.hidden = !show;
   document.querySelector('.wrap').classList.toggle('with-rail', show);
   if (!show) return;
-  const items = incomeItems(), total = items.reduce((s, x) => s + x.amount, 0);
-  const y = today().slice(0, 4), m = today().slice(0, 7);
-  const yearSum = items.filter(x => (x.date || '').startsWith(y)).reduce((s, x) => s + x.amount, 0);
-  const monthSum = items.filter(x => (x.date || '').startsWith(m)).reduce((s, x) => s + x.amount, 0);
+  const sc = railScope(), ids = new Set(sc.list.map(b => b.id)), t = sumMoney(sc.list);
+  const left = sc.list.reduce((s, b) => s + leftOf(b, bMoney(b)), 0), owed = t.owed;
+  const share = t.total ? Math.min(100, Math.round(t.paid / t.total * 100)) : 0;
 
-  // Donut: share per project, by income or by number of episodes
-  const rows = packages.map(p => ({ p, v: chartMetric === 'money' ? items.filter(x => x.pkg === p.id).reduce((s, x) => s + x.amount, 0) : epsOf(p.id).length }))
-    .filter(r => r.v > 0);
-  const sum = rows.reduce((s, r) => s + r.v, 0);
-  const R = 52, C = 2 * Math.PI * R;
-  let acc = 0;
-  const arcs = rows.map(r => {
-    const len = r.v / sum * C, gap = rows.length > 1 ? 2 : 0;
-    const a = `<circle class="arc" cx="70" cy="70" r="${R}" fill="none" stroke="${projColor(r.p)}" stroke-width="18"
-      stroke-dasharray="${Math.max(0, len - gap)} ${C - Math.max(0, len - gap)}" stroke-dashoffset="${-acc}" transform="rotate(-90 70 70)"
-      data-tip="${esc(r.p.client)}: ${chartMetric === 'money' ? money(r.v) : r.v + ' פרקים'} (${Math.round(r.v / sum * 100)}%)"></circle>`;
-    acc += len;
-    return a;
-  }).join('');
-  const donut = sum ? `<div class="donut-wrap"><svg viewBox="0 0 140 140" class="donut" role="img" aria-label="חלוקה לפי פרויקט">
-      <circle cx="70" cy="70" r="${R}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="18"></circle>${arcs}
-      <text x="70" y="66" text-anchor="middle" class="d-big">${chartMetric === 'money' ? money(sum) : sum}</text>
-      <text x="70" y="84" text-anchor="middle" class="d-sm">${chartMetric === 'money' ? 'סה״כ הכנסות' : 'פרקים'}</text></svg>
-      <ul class="c-legend">${rows.sort((a, b) => b.v - a.v).map(r => `<li><i style="background:${projColor(r.p)}"></i><span class="lg-nm">${esc(r.p.client)}</span>
-        <span class="lg-v">${chartMetric === 'money' ? money(r.v) : r.v} · ${Math.round(r.v / sum * 100)}%</span></li>`).join('')}</ul></div>`
-    : `<div class="small c-empty">${chartMetric === 'money' ? 'עוד אין הכנסות. הוסף מחיר לחבילות (בעריכת חבילה) או מחיר לפרק (בעריכת פרויקט).' : 'עוד אין פרקים.'}</div>`;
+  // Paid vs not paid
+  const R = 52, C = 2 * Math.PI * R, paidLen = t.total ? Math.min(1, t.paid / t.total) * C : 0, gap = paidLen > 0 && paidLen < C ? 2 : 0;
+  const sig = JSON.stringify([sc.title, t]), fresh = sig !== railSig; railSig = sig;
+  const paidDonut = t.total ? `<div class="donut-wrap"><svg viewBox="0 0 140 140" class="donut" role="img" aria-label="שולם ${share}%">
+      <circle cx="70" cy="70" r="${R}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="18" data-tip="נשאר לתשלום: ${money(left)}"></circle>
+      ${paidLen ? `<circle class="arc ${fresh ? 'd-arc-in' : ''}" cx="70" cy="70" r="${R}" fill="none" stroke="#ff6600" stroke-width="18" stroke-linecap="${gap ? 'round' : 'butt'}"
+        stroke-dasharray="${Math.max(0, paidLen - gap)} ${C}" transform="rotate(-90 70 70)" data-tip="שולם: ${money(t.paid)}"></circle>` : ''}
+      <text x="70" y="68" text-anchor="middle" class="d-big">${share}%</text>
+      <text x="70" y="86" text-anchor="middle" class="d-sm">שולם</text></svg>
+      <ul class="c-legend">
+        <li><i style="background:#ff6600"></i><span class="lg-nm">שולם</span><span class="lg-v">${money(t.paid)}</span></li>
+        <li><i style="background:rgba(255,255,255,.18)"></i><span class="lg-nm">נשאר לתשלום</span><span class="lg-v">${money(left)}</span></li>
+        ${owed ? `<li><i style="background:transparent;outline:1.5px dashed var(--faint)"></i><span class="lg-nm">מתוכם על פרקים שנעשו</span><span class="lg-v">${money(owed)}</span></li>` : ''}
+      </ul></div>`
+    : `<div class="small c-empty">עוד אין סכומים. הם יופיעו כשיהיו פרקים בחבילה עם מחיר לפרק.</div>`;
 
-  // Bars: income per month (last 12 months) or per year
-  let buckets;
-  if (barMode === 'month') {
-    buckets = Array.from({ length: 12 }, (_, i) => { const d = new Date(m + '-01T00:00'); d.setMonth(d.getMonth() - 11 + i); const k = d.toLocaleDateString('en-CA').slice(0, 7);
-      return { k, label: d.toLocaleDateString('he-IL', { month: 'short' }), full: d.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' }) }; });
-  } else {
-    const years = [...new Set(items.map(x => (x.date || '').slice(0, 4)).filter(Boolean)), y].sort();
-    buckets = years.map(k => ({ k, label: k, full: k }));
+  // Share per project (home only): what each project paid, or its number of episodes
+  let byProject = '';
+  if (sc.home) {
+    const rows = packages.map(p => ({ p, v: chartMetric === 'money' ? bundlesOf(p.id).reduce((s, b) => s + bMoney(b).paid, 0) : epsOf(p.id).length })).filter(r => r.v > 0);
+    const sum = rows.reduce((s, r) => s + r.v, 0);
+    let acc = 0;
+    const arcs = rows.map(r => {
+      const len = r.v / sum * C, g = rows.length > 1 ? 2 : 0;
+      const a = `<circle class="arc" cx="70" cy="70" r="${R}" fill="none" stroke="${projColor(r.p)}" stroke-width="18"
+        stroke-dasharray="${Math.max(0, len - g)} ${C - Math.max(0, len - g)}" stroke-dashoffset="${-acc}" transform="rotate(-90 70 70)"
+        data-tip="${esc(r.p.client)}: ${chartMetric === 'money' ? money(r.v) : r.v + ' פרקים'} (${Math.round(r.v / sum * 100)}%)"></circle>`;
+      acc += len;
+      return a;
+    }).join('');
+    byProject = `<section class="chart">
+      <div class="c-head"><h3>לפי פרויקט</h3>
+        <div class="seg" role="group"><button class="${chartMetric === 'money' ? 'on' : ''}" onclick="chartMetric='money';renderRail()">שולם</button><button class="${chartMetric === 'eps' ? 'on' : ''}" onclick="chartMetric='eps';renderRail()">פרקים</button></div></div>
+      ${sum ? `<div class="donut-wrap"><svg viewBox="0 0 140 140" class="donut" role="img" aria-label="חלוקה לפי פרויקט">
+        <circle cx="70" cy="70" r="${R}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="18"></circle>${arcs}
+        <text x="70" y="66" text-anchor="middle" class="d-big">${chartMetric === 'money' ? money(sum) : sum}</text>
+        <text x="70" y="84" text-anchor="middle" class="d-sm">${chartMetric === 'money' ? 'שולם' : 'פרקים'}</text></svg>
+        <ul class="c-legend">${rows.sort((a, b) => b.v - a.v).map(r => `<li><i style="background:${projColor(r.p)}"></i><span class="lg-nm">${esc(r.p.client)}</span>
+          <span class="lg-v">${chartMetric === 'money' ? money(r.v) : r.v} · ${Math.round(r.v / sum * 100)}%</span></li>`).join('')}</ul></div>`
+      : `<div class="small c-empty">${chartMetric === 'money' ? 'עוד לא נרשמו תשלומים.' : 'עוד אין פרקים.'}</div>`}
+    </section>`;
   }
-  buckets.forEach(bk => bk.v = items.filter(x => (x.date || '').startsWith(bk.k)).reduce((s, x) => s + x.amount, 0));
-  const max = Math.max(...buckets.map(b => b.v), 0);
-  const nice = max ? Math.pow(10, Math.floor(Math.log10(max))) * Math.ceil(max / Math.pow(10, Math.floor(Math.log10(max)))) : 1;
-  const W = 280, H = 150, top = 8, base = 120, left = 4, slot = (W - left) / buckets.length, bw = Math.min(22, slot * 0.6);
-  const grid = [0.5, 1].map(f => `<line x1="0" x2="${W}" y1="${base - (base - top) * f}" y2="${base - (base - top) * f}" class="gl"></line>
-      <text x="${W}" y="${base - (base - top) * f - 3}" class="gt" text-anchor="end">${money(nice * f)}</text>`).join('');
-  const bars = buckets.map((bk, i) => {
-    const h = bk.v ? Math.max(3, (base - top) * bk.v / nice) : 0, x = left + slot * i + (slot - bw) / 2;
-    return `<g class="bar-g" data-tip="${esc(bk.full)}: ${money(bk.v)}">
-      <rect x="${left + slot * i}" y="${top}" width="${slot}" height="${base - top}" fill="transparent"></rect>
-      ${h ? `<rect x="${x}" y="${base - h}" width="${bw}" height="${h}" rx="4" class="bar-r ${bk.k === (barMode === 'month' ? m : y) ? 'now' : ''}"></rect>` : ''}
-      <text x="${left + slot * i + slot / 2}" y="${base + 16}" text-anchor="middle" class="xt">${esc(bk.label)}</text></g>`;
-  }).join('');
 
   $('railBody').innerHTML = `
-    <div class="rail-stats">
-      <div><span>החודש</span><b>${money(monthSum)}</b></div>
-      <div><span>השנה</span><b>${money(yearSum)}</b></div>
+    <div class="rail-scope"><span class="small">מציג</span><b>${esc(sc.title)}</b></div>
+    <div class="rail-stats three">
+      <div><span>סה״כ</span><b>${money(t.total)}</b></div>
+      <div class="ok"><span>שולם</span><b>${money(t.paid)}</b></div>
+      <div class="due"><span>נשאר</span><b>${money(left)}</b></div>
     </div>
-    <section class="chart">
-      <div class="c-head"><h3>חלוקה לפי פרויקט</h3>
-        <div class="seg" role="group"><button class="${chartMetric === 'money' ? 'on' : ''}" onclick="chartMetric='money';renderRail()">הכנסות</button><button class="${chartMetric === 'eps' ? 'on' : ''}" onclick="chartMetric='eps';renderRail()">פרקים</button></div></div>
-      ${donut}
-    </section>
-    <section class="chart">
-      <div class="c-head"><h3>הכנסות</h3>
-        <div class="seg" role="group"><button class="${barMode === 'month' ? 'on' : ''}" onclick="barMode='month';renderRail()">חודשי</button><button class="${barMode === 'year' ? 'on' : ''}" onclick="barMode='year';renderRail()">שנתי</button></div></div>
-      ${total ? `<svg viewBox="0 0 ${W} ${H}" class="bars" role="img" aria-label="הכנסות ${barMode === 'month' ? 'חודשיות' : 'שנתיות'}">${grid}<line x1="0" x2="${W}" y1="${base}" y2="${base}" class="bl"></line>${bars}</svg>`
-        : '<div class="small c-empty">הגרף יופיע אחרי שתוסיף מחירים.</div>'}
-    </section>
+    <section class="chart"><div class="c-head"><h3>שולם מול לא שולם</h3></div>${paidDonut}</section>
+    <section class="chart" id="lcHost"></section>
+    ${byProject}
     <div class="rail-tip" id="railTip" hidden></div>`;
+
+  // Paid per month (last 12 months), next to what the episodes done that month are worth
+  const m = today().slice(0, 7);
+  const months = Array.from({ length: 12 }, (_, i) => { const d = new Date(m + '-01T00:00'); d.setMonth(d.getMonth() - 11 + i);
+    const k = d.toLocaleDateString('en-CA').slice(0, 7);
+    return { k, label: d.toLocaleDateString('he-IL', { month: 'short' }), full: d.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' }), paid: 0, worth: 0 }; });
+  const at = Object.fromEntries(months.map(x => [x.k, x]));
+  fin.payments.forEach(x => { if (ids.has(x.bundle) && at[(x.date || '').slice(0, 7)]) at[x.date.slice(0, 7)].paid += x.amount; });
+  episodes.forEach(e => { if (ids.has(e.bundle) && at[(e.date || '').slice(0, 7)]) at[e.date.slice(0, 7)].worth += priceOf(bundleOf(e)); });
+  const now = months[11], prev = months[10];
+  lineChart($('lcHost'), { id: 'monthly', title: 'תשלומים לפי חודש', desc: `שולם ב${now.full.split(' ')[0]} · 12 החודשים האחרונים`,
+    data: months, index: 'label', titleKey: 'full', headline: now.paid, delta: prev.paid ? (now.paid - prev.paid) / prev.paid * 100 : null,
+    series: [{ key: 'paid', label: 'שולם', color: '#ff6600' }, { key: 'worth', label: 'שווי הפרקים שנעשו', color: '#0a84ff' }],
+    format: money, axisFormat: v => '₪' + new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(v) });
 }
-// One tooltip for both charts
+let railSig = '';
+// One tooltip for the donuts
 $('rail').addEventListener('pointerover', ev => {
   const el = ev.target.closest('[data-tip]'), tip = $('railTip'); if (!tip) return;
   if (!el) { tip.hidden = true; return; }
@@ -1048,47 +1265,176 @@ $('rail').addEventListener('pointerover', ev => {
 });
 $('rail').addEventListener('pointerleave', () => { const tip = $('railTip'); if (tip) tip.hidden = true; });
 
-// ---------- packages inside a project ----------
-// Episodes fill the packages in the order they were marked; whatever is left is "outside the packages"
-function sections(p) {
-  const eps = epsOf(p.id);
-  let start = 0;
-  const secs = bundlesOf(p.id).map((b, k) => {
-    const s = { key: b.id, b, k, size: b.size, start, items: eps.slice(start, start + b.size).map((e, j) => ({ e, i: start + j })) };
-    start += b.size;
-    return s;
+// ---------- line chart (a port of the chart-line component: smooth line over a dotted area, drawn in on first view,
+// pulsing marker on the last point, crosshair + tooltip on hover and arrow keys, toggleable legend, counting headline) ----------
+const lcHidden = {}, lcSeen = new Set();
+const r2 = v => Math.round(v * 100) / 100;
+const TREND = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 11.5 6 7.5l3 3 5-6"/></svg>';
+function niceTicks(lo, hi, count) {
+  if (hi <= lo) hi = lo + 1;
+  const raw = (hi - lo) / Math.max(1, count), mag = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / mag;
+  const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * mag;
+  let v = Math.floor(lo / step) * step; const out = [v];
+  while (v < hi - step * 1e-9) { v = +(v + step).toFixed(10); out.push(v); }
+  return out;
+}
+// Monotone cubic curve: smooth, never overshoots below zero between months
+function smoothPath(pts) {
+  const n = pts.length; if (!n) return ''; if (n === 1) return `M${pts[0][0]},${pts[0][1]}`;
+  const dx = [], sl = [], t = [];
+  for (let i = 0; i < n - 1; i++) { dx[i] = pts[i + 1][0] - pts[i][0]; sl[i] = (pts[i + 1][1] - pts[i][1]) / (dx[i] || 1); }
+  t[0] = sl[0]; t[n - 1] = sl[n - 2];
+  for (let i = 1; i < n - 1; i++) t[i] = sl[i - 1] * sl[i] <= 0 ? 0 : 3 * (dx[i - 1] + dx[i]) / ((2 * dx[i] + dx[i - 1]) / sl[i - 1] + (dx[i] + 2 * dx[i - 1]) / sl[i]);
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 0; i < n - 1; i++) {
+    const h = dx[i] / 3;
+    d += `C${r2(pts[i][0] + h)},${r2(pts[i][1] + t[i] * h)},${r2(pts[i + 1][0] - h)},${r2(pts[i + 1][1] - t[i + 1] * h)},${pts[i + 1][0]},${pts[i + 1][1]}`;
+  }
+  return d;
+}
+function lineChart(host, c) {
+  const hidden = lcHidden[c.id] ||= new Set(), sig = c.id + JSON.stringify(c.data);
+  const still = lcSeen.has(sig) || reducedMotion.matches;
+  lcSeen.add(sig);
+  host.innerHTML = `<div class="lc">
+    <div class="lc-head"><span class="lc-ic">${TREND}</span><div class="lc-tt"><h3>${esc(c.title)}</h3><div class="small">${esc(c.desc)}</div></div></div>
+    <div class="lc-val"><b class="lc-num">${c.format(c.headline)}</b>${c.delta == null ? '' : `<span class="lc-delta ${c.delta < 0 ? 'down' : ''}">${c.delta >= 0 ? '+' : '−'}${Math.abs(Math.round(c.delta))}%</span>`}</div>
+    <div class="lc-plot" tabindex="0" role="group" aria-label="${esc(c.title)}. חיצים ימינה ושמאלה עוברים בין החודשים"></div>
+    ${c.series.length > 1 ? `<div class="lc-legend">${c.series.map(s => `<button type="button" class="lc-key ${hidden.has(s.key) ? 'off' : ''}" data-k="${s.key}" aria-pressed="${!hidden.has(s.key)}"><i style="background:${s.color}"></i>${esc(s.label)}</button>`).join('')}</div>` : ''}
+  </div>`;
+  const plot = host.querySelector('.lc-plot'), num = host.querySelector('.lc-num'), n = c.data.length, H = c.height || 190, padT = 10, padR = 12;
+  if (!still && c.headline) {  // headline counts up with the line
+    const t0 = performance.now(), dur = 1200;
+    const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4);
+      num.textContent = c.format(c.headline * e); if (k < 1 && num.isConnected) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
+  let geo = null, active = null, drawnW = 0;
+  function draw(animate) {
+    const W = Math.round(plot.clientWidth); if (!W) return;
+    drawnW = W;
+    const vis = c.series.filter(s => !hidden.has(s.key));
+    const vals = vis.flatMap(s => c.data.map(d => d[s.key] || 0));
+    const ticks = niceTicks(0, Math.max(0, ...vals) || 1000, 4), lo = 0, hi = ticks[ticks.length - 1];
+    const padL = Math.max(...ticks.map(v => c.axisFormat(v).length), 1) * 6.4 + 14;
+    const svgH = H + 26, plotW = Math.max(W - padL - padR, 1);
+    const xAt = i => r2(n <= 1 ? padL + plotW / 2 : padL + i / (n - 1) * plotW);
+    const yAt = v => r2(padT + (1 - (v - lo) / (hi - lo)) * (H - padT));
+    const baseY = yAt(0);
+    const labelW = Math.max(...c.data.map(d => String(d[c.index]).length), 1) * 6.6 + 14;
+    const every = Math.max(1, Math.ceil(n * labelW / plotW));
+    const paths = c.series.map((s, si) => {
+      const off = hidden.has(s.key), pts = c.data.map((d, i) => [xAt(i), off ? baseY : yAt(d[s.key] || 0)]);
+      const line = smoothPath(pts);
+      return { s, si, off, pts, line, area: `${line}L${pts[n - 1][0]},${baseY}L${pts[0][0]},${baseY}Z` };
+    });
+    const dur = 1.2, uid = 'lc' + c.id, marker = paths.find(x => !x.off), drawEnd = dur + Math.max(vis.length - 1, 0) * 0.15;
+    const fade = d => animate ? ` class="lc-fade" style="animation-delay:${d}s"` : '';
+    plot.style.height = svgH + 'px';
+    plot.innerHTML = `<svg width="${W}" height="${svgH}">
+      <defs>
+        <clipPath id="${uid}-rv"><rect x="0" y="-20" height="${svgH + 40}" width="${animate ? 0 : W + 20}">
+          ${animate ? `<animate attributeName="width" from="0" to="${W + 20}" dur="${dur * 1.1}s" calcMode="spline" keyTimes="0;1" keySplines=".65 0 .35 1" fill="freeze"/>` : ''}</rect></clipPath>
+        ${paths.map(x => `<pattern id="${uid}-f${x.si}" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1.25" cy="1.25" r="1.1" fill="${x.s.color}"/><circle cx="3.75" cy="3.75" r="1.1" fill="${x.s.color}"/></pattern>`).join('')}
+      </defs>
+      ${ticks.map(v => `<line x1="${padL}" x2="${W - padR + 4}" y1="${yAt(v)}" y2="${yAt(v)}" stroke="rgba(255,255,255,.08)" stroke-dasharray="3 4"${fade(0)}/>`).join('')}
+      ${ticks.map(v => `<text x="${padL - 10}" y="${yAt(v)}" text-anchor="end" dominant-baseline="middle" font-size="11" fill="#8e8e93"${fade(0.1)}>${esc(c.axisFormat(v))}</text>`).join('')}
+      ${c.data.map((d, i) => i % every === 0 ? `<text x="${xAt(i)}" y="${H + 19}" text-anchor="middle" font-size="11" fill="#8e8e93" data-x="${i}"${fade(i / Math.max(n - 1, 1) * dur * 0.6)}>${esc(d[c.index])}</text>` : '').join('')}
+      <g clip-path="url(#${uid}-rv)" opacity=".55">${paths.map(x => x.off ? '' : `<path d="${x.area}" fill="url(#${uid}-f${x.si})" opacity="${x.si === 0 ? 1 : 0.55}"/>`).join('')}</g>
+      ${paths.map(x => x.off ? '' : `<path class="lc-line ${animate ? 'anim' : ''}" style="--d:${x.si * 0.15}s" pathLength="1" d="${x.line}" fill="none" stroke="${x.s.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}
+      <g class="lc-cross" opacity="0" pointer-events="none"><line x1="0" x2="0" y1="${padT - 4}" y2="${H}" stroke="#f5f5f7" stroke-opacity=".25" stroke-dasharray="3 3"/></g>
+      ${marker ? `<g transform="translate(${marker.pts[n - 1][0]},${marker.pts[n - 1][1]})" pointer-events="none"><g class="lc-pop ${animate ? 'anim' : ''}" style="--d:${dur * 0.95}s">
+        <circle class="lc-pulse" r="7" fill="${marker.s.color}" style="--d:${animate ? drawEnd : 0}s"/><circle r="7.5" fill="#1b1b1e"/><circle r="4.5" fill="${marker.s.color}"/></g></g>` : ''}
+      ${paths.map(x => `<circle class="lc-dot" data-s="${x.si}" r="5" fill="${x.s.color}" stroke="#1b1b1e" stroke-width="2.5" opacity="0" pointer-events="none"/>`).join('')}
+    </svg><div class="lc-tip" hidden></div>`;
+    geo = { W, padL, plotW, H, paths, vis, xAt };
+    if (active != null) show(active);
+  }
+  function show(i) {
+    active = i; if (!geo) return;
+    const svg = plot.querySelector('svg'), tip = plot.querySelector('.lc-tip'), cross = svg.querySelector('.lc-cross');
+    if (i == null || !geo.vis.length) {
+      cross.setAttribute('opacity', 0); svg.querySelectorAll('.lc-dot').forEach(d => d.setAttribute('opacity', 0)); tip.hidden = true;
+      svg.querySelectorAll('[data-x]').forEach(t => t.setAttribute('fill', '#8e8e93')); return;
+    }
+    const x = geo.xAt(i);
+    cross.setAttribute('transform', `translate(${x},0)`); cross.setAttribute('opacity', 1);
+    const ys = [];
+    svg.querySelectorAll('.lc-dot').forEach(d => { const p = geo.paths[+d.dataset.s];
+      if (p.off) return d.setAttribute('opacity', 0);
+      d.setAttribute('cx', p.pts[i][0]); d.setAttribute('cy', p.pts[i][1]); d.setAttribute('opacity', 1); ys.push(p.pts[i][1]); });
+    svg.querySelectorAll('[data-x]').forEach(t => t.setAttribute('fill', +t.dataset.x === i ? '#f5f5f7' : '#8e8e93'));
+    const d = c.data[i];
+    tip.innerHTML = `<div class="tt">${esc(d[c.titleKey || c.index])}</div>${geo.vis.map(s => `<div class="tr"><i style="background:${s.color}"></i><span>${esc(s.label)}</span><b>${esc(c.format(d[s.key] || 0))}</b></div>`).join('')}`;
+    tip.hidden = false;
+    const tw = tip.offsetWidth, th = tip.offsetHeight, y = Math.min(Math.max(Math.min(...ys) - th / 2, 0), geo.H - th);
+    tip.style.transform = `translate(${x + 14 + tw <= geo.W ? x + 14 : x - 14 - tw}px, ${y}px)`;
+  }
+  const idxAt = clientX => {
+    if (!geo) return null; const x = clientX - plot.getBoundingClientRect().left;
+    return n <= 1 ? 0 : Math.min(n - 1, Math.max(0, Math.round((x - geo.padL) / geo.plotW * (n - 1))));
+  };
+  plot.addEventListener('pointermove', ev => show(idxAt(ev.clientX)));
+  plot.addEventListener('pointerdown', ev => show(idxAt(ev.clientX)));
+  plot.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') show(null); });
+  plot.addEventListener('blur', () => show(null));
+  plot.addEventListener('keydown', ev => {
+    const mv = { ArrowRight: a => a == null ? 0 : Math.min(n - 1, a + 1), ArrowLeft: a => a == null ? n - 1 : Math.max(0, a - 1), Home: () => 0, End: () => n - 1, Escape: () => null }[ev.key];
+    if (!mv) return; ev.preventDefault(); show(mv(active));
   });
-  return { secs, rest: eps.slice(start).map((e, j) => ({ e, i: start + j })), eps };
+  host.querySelectorAll('.lc-key').forEach(k => k.onclick = () => {
+    hidden.has(k.dataset.k) ? hidden.delete(k.dataset.k) : hidden.add(k.dataset.k);
+    k.classList.toggle('off', hidden.has(k.dataset.k)); k.setAttribute('aria-pressed', !hidden.has(k.dataset.k));
+    draw(false);
+  });
+  draw(!still);
+  host._ro?.disconnect();
+  host._ro = new ResizeObserver(() => { if (Math.round(plot.clientWidth) !== drawnW) draw(!drawnW && !still); });
+  host._ro.observe(plot);
+}
+
+// ---------- packages inside a project ----------
+// Each episode belongs to one package; episodes whose package was deleted are "בלי חבילה"
+function sections(p) {
+  const eps = epsOf(p.id), num = new Map(eps.map((e, i) => [e, i]));
+  const secs = bundlesOf(p.id).map((b, k) => ({ key: b.id, b, k, size: b.size, items: epsIn(b.id).map(e => ({ e, i: num.get(e) })) }));
+  const ids = new Set(secs.map(s => s.key));
+  return { secs, rest: eps.filter(e => !ids.has(e.bundle)).map(e => ({ e, i: num.get(e) })), eps };
 }
 function sideBundles(p) {
   const { secs, rest, eps } = sections(p);
   const item = (key, active, nm, sub, pctv) => `<button class="pkg ${active ? 'active' : ''}" data-b="${esc(key)}">
       <div class="nm">${nm}</div><div class="sub">${sub}</div>
       ${pctv == null ? '' : `<div class="mini-bar"><i style="width:${pctv}%"></i></div>`}</button>`;
-  return item('', !selBundle, 'כל הפרויקט', `${eps.length === 1 ? 'פרק אחד' : eps.length + ' פרקים'}${capOf(p) ? ` · ${capOf(p)} בחבילות` : ''}`, null)
-    + secs.map(s => item(s.key, selBundle === s.key, `${esc(bName(s.b, s.k))}<span class="badge">שולם מראש</span>`,
-        `${s.items.length} / ${s.size}${isAdmin() && fin.bundles[s.b.id]?.price != null ? ' · ' + money(fin.bundles[s.b.id].price) : ''}`, Math.round(s.items.length / s.size * 100))).join('')
-    + (rest.length || !secs.length ? item('out', selBundle === 'out', secs.length ? 'מחוץ לחבילה' : 'פרקים בלי חבילה',
-        `${rest.length} · שולם ${rest.filter(x => paidOf(x.e)).length} · לא שולם ${rest.filter(x => !paidOf(x.e)).length}`, null) : '')
+  const moneyLine = b => { if (!isAdmin() || !priceOf(b)) return ''; const m = bMoney(b), l = leftOf(b, m);
+    return l ? ` · נשאר ${money(l)}` : m.paid ? ' · שולם' : ''; };
+  const badge = s => { const n = s.items.filter(x => paidOf(x.e)).length;
+    return s.items.length && n === s.items.length ? '<span class="badge">שולם</span>' : ''; };
+  return item('', !selBundle, 'כל הפרויקט', `${eps.length === 1 ? 'פרק אחד' : eps.length + ' פרקים'}${secs.length ? ` · ${secs.length === 1 ? 'חבילה אחת' : secs.length + ' חבילות'}` : ''}`, null)
+    + secs.map(s => item(s.key, selBundle === s.key, `${esc(bName(s.b, s.k))}${badge(s)}`,
+        `${s.size == null ? `${s.items.length} פרקים · פתוחה` : `${s.items.length} / ${s.size}`}${moneyLine(s.b)}`,
+        s.size == null ? null : Math.min(100, Math.round(s.items.length / s.size * 100)))).join('')
+    + (rest.length ? item('out', selBundle === 'out', 'בלי חבילה', `${rest.length} · שולם ${rest.filter(x => paidOf(x.e)).length}`, null) : '')
     + (isAdmin() ? '<button class="ghost side-add" onclick="openBundle()">+ הוספת חבילה</button>' : '');
 }
 
 // ---------- all projects (the logo leads here) ----------
 function renderHome(main) {
   const cards = packages.map(p => {
-    const eps = epsOf(p.id), done = eps.length, cap = capOf(p), paidN = eps.filter(paidOf).length;
-    let start = 0;
+    const eps = epsOf(p.id), done = eps.length, cap = isOpen(p) ? 0 : capOf(p), paidN = eps.filter(paidOf).length;
     const bundleChips = bundlesOf(p.id).map((b, k) => {
-      const used = Math.min(b.size, Math.max(0, done - start)); start += b.size;
-      return `<span class="${used >= b.size ? 'full' : ''}">${esc(bName(b, k))} · ${used}/${b.size}</span>`;
+      const used = epsIn(b.id).length;
+      return `<span class="${b.size != null && used >= b.size ? 'full' : ''}">${esc(bName(b, k))} · ${b.size == null ? used + ' · פתוחה' : used + '/' + b.size}</span>`;
     }).join('');
+    const mm = sumMoney(bundlesOf(p.id)), mLeft = bundlesOf(p.id).reduce((s, b) => s + leftOf(b, bMoney(b)), 0);
     return `<button class="proj-card" onclick="openProject('${esc(p.id)}')">
       <span class="pc-name">${esc(p.client)}</span>
-      <span class="small">${cap ? `${bundlesOf(p.id).length === 1 ? 'חבילה אחת' : bundlesOf(p.id).length + ' חבילות'} · ${cap} פרקים` : 'פרויקט פתוח, בלי חבילה'}</span>
+      <span class="small">${!bundlesOf(p.id).length ? 'עוד אין חבילות' : `${bundlesOf(p.id).length === 1 ? 'חבילה אחת' : bundlesOf(p.id).length + ' חבילות'}${cap ? ` · ${cap} פרקים` : ''}`}</span>
       <span class="pc-big">${cap ? `<b>${done}</b><span>מתוך ${cap} · ${pct(p)}%</span>` : `<b>${done}</b><span>${done === 1 ? 'פרק' : 'פרקים'}</span>`}</span>
       ${cap ? `<span class="mini-bar"><i style="width:${pct(p)}%"></i></span>` : ''}
       ${bundleChips ? `<span class="pc-bundles">${bundleChips}</span>` : ''}
-      <span class="small">שולם ${paidN} · לא שולם ${done - paidN}</span>
+      <span class="small">פרקים: שולם ${paidN} · לא שולם ${done - paidN}</span>
+      ${isAdmin() && mm.total ? `<span class="pc-money">שולם <b>${money(mm.paid)}</b> · נשאר ${money(mLeft)}</span>` : ''}
       ${catsOf(p.id).length ? `<span class="pc-cats">${catsOf(p.id).map(c => `<i style="background:${c.color}" title="${esc(c.name)}"></i>`).join('')}</span>` : ''}
     </button>`;
   }).join('');
