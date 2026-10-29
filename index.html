@@ -523,18 +523,18 @@ function inkOn(hex) {  // black text on light colors, white on dark ones
 }
 const catVars = hex => `--c:${hex};--c-ink:${inkOn(hex)}`;
 const catTag = e => { const c = catOf(e); return c ? `<span class="cat-tag" style="${catVars(c.color)}">${esc(c.name)}</span>` : ''; };
-// Paid status: a package's payments cover its first episodes. Everyone sees it; only the admin records payments.
+// Paid status: worked out by the server from the package's payments. Everyone sees it; only the admin switches it
+// (the switch adds or takes back one episode price for that episode).
 function payChip(e) {
-  if (paidOf(e)) return '';
-  return isAdmin() && e.bundle
-    ? `<button class="pay-chip" onclick="payEpisode('${esc(e.id)}')" title="רישום תשלום על פרק אחד">לא שולם</button>`
-    : `<span class="pay-chip">לא שולם</span>`;
+  const paid = paidOf(e);
+  if (!isAdmin()) return paid ? '' : `<span class="pay-chip">לא שולם</span>`;
+  return `<button class="pay-chip ${paid ? 'paid' : ''}" onclick="setPaid('${esc(e.id)}', ${!paid})" title="${paid ? 'סימון כלא שולם' : 'סימון כשולם'}">${paid ? 'שולם' : 'לא שולם'}</button>`;
 }
-async function payEpisode(id) {
-  const b = bundleOf(episodes.find(x => x.id === id)); if (!b) return;
-  const price = priceOf(b);
-  if (!price) { toast('קודם צריך להגדיר מחיר לפרק בחבילה'); return openBundle(b.id); }
-  await write('pc_save_payment', { p_id: null, p_bundle_id: b.id, p_amount: price, p_paid_on: today(), p_note: 'תשלום על פרק' }, `נרשם תשלום של ${money(price)}`);
+async function setPaid(id, paid, on) {
+  const e = episodes.find(x => x.id === id), b = bundleOf(e);
+  if (paid && b && !priceOf(b)) { toast('קודם צריך להגדיר מחיר לפרק בחבילה'); return openBundle(b.id); }
+  await write('pc_set_episode_paid', { p_id: id, p_paid: paid, p_on: on || today() },
+    paid ? (b ? `הפרק סומן כשולם · נרשם ${money(priceOf(b))}` : 'הפרק סומן כשולם') : 'הפרק סומן כלא שולם');
 }
 const fmtDay = d => new Date(d + 'T00:00').toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
 const current = () => packages.find(p => p.id === selectedId);
@@ -549,7 +549,7 @@ const bundleOf = e => e && e.bundle ? bundles.find(b => b.id === e.bundle) || nu
 const capOf = p => bundlesOf(p.id).reduce((s, b) => s + (b.size || 0), 0);
 const isOpen = p => !bundlesOf(p.id).length || bundlesOf(p.id).some(b => b.size == null);
 const pct = p => capOf(p) && !isOpen(p) ? Math.min(100, Math.round(epsOf(p.id).length / capOf(p) * 100)) : 0;
-const paidOf = e => { const b = bundleOf(e); return b ? epsIn(b.id).indexOf(e) < b.paidEps : !!e.paid; };
+const paidOf = e => { if (e.isPaid != null) return e.isPaid; const b = bundleOf(e); return b ? epsIn(b.id).indexOf(e) < b.paidEps : !!e.paid; };
 // Where a new episode goes (same rule as the server): the first fixed package with room, else the newest open one
 function autoBundle(p) {
   const list = bundlesOf(p.id);
@@ -588,7 +588,7 @@ async function load() {
     packages = s.packages.map(p => ({ ...p, guests: p.guests || [] }));
     categories = s.categories || [];
     bundles = (s.bundles || []).map(b => ({ id: b.id, pkg: b.package_id, size: b.size, note: b.note, at: b.created_at, paidEps: b.paid_eps || 0 }));
-    episodes = s.episodes.map(e => ({ id: e.id, pkg: e.package_id, bundle: e.bundle_id || null, cat: e.category_id || null, paid: !!e.paid, guest: e.guest, title: e.title, date: e.date, note: e.note, by: e.by_name, at: e.created_at }));
+    episodes = s.episodes.map(e => ({ id: e.id, pkg: e.package_id, bundle: e.bundle_id || null, cat: e.category_id || null, paid: !!e.paid, isPaid: e.is_paid ?? null, guest: e.guest, title: e.title, date: e.date, note: e.note, by: e.by_name, at: e.created_at }));
     const snap = JSON.stringify(s);
     const changed = snap !== lastSnap || !loaded || offline;
     lastSnap = snap; loaded = true; offline = false; linkError = null;
@@ -642,6 +642,7 @@ async function write(fn, args, okText) {
   if (res.error === 'locked') toast('יותר מדי ניסיונות. אפשר לנסות שוב בעוד 15 דקות.');
   else if (res.error === 'not_found') { toast('הפריט כבר נמחק על ידי מישהו אחר.'); await load(); }
   else if (res.error === 'admin_only') toast('רק המנהל יכול לעשות את זה.');
+  else if (res.error === 'no_price') toast('קודם צריך להגדיר מחיר לפרק בחבילה');
   else if (res.error === 'too_late') { toast('עברו יותר מ-10 דקות. רק המנהל יכול לשנות את הפרק הזה.'); render(); }
   else toast('השמירה לא הצליחה. בדוק את החיבור ונסה שוב.');
   return false;
@@ -1002,8 +1003,8 @@ function openEp(id) {
     <div class="cat-pick" role="radiogroup">
       ${list.map((b, k) => `<label class="cat-opt"><input type="radio" name="bundle" value="${esc(b.id)}" ${pick && pick.id === b.id ? 'checked' : ''}><span>${esc(bName(b, k))} <span class="small">${b.size == null ? epsIn(b.id).length + ' · פתוחה' : epsIn(b.id).length + '/' + b.size}</span></span></label>`).join('')}
     </div>`;
-  // Admin, new episode: record its payment right away
-  const payPick = e || !isAdmin() ? '' : `<label class="cat-opt" style="margin-top:14px;--c:#32d74b"><input type="checkbox" name="paynow"><span><i></i>הפרק שולם · לרשום תשלום</span></label>`;
+  // Admin: paid or not (a new episode's payment is recorded right away)
+  const payPick = !isAdmin() ? '' : `<label class="cat-opt" style="margin-top:14px;--c:#32d74b"><input type="checkbox" name="paynow" ${e && paidOf(e) ? 'checked' : ''}><span><i></i>הפרק שולם${e ? '' : ' · לרשום תשלום'}</span></label>`;
   openModal(`<form id="epForm">
     <h3>${e ? 'עריכת פרק' : `פרק ${epsOf(p.id).length + 1} גמור`}</h3>
     <label for="f-guest">עם מי?</label>
@@ -1036,11 +1037,8 @@ function openEp(id) {
     if (!res) return;
     const saved = episodes.find(x => x.id === res.id);
     if (chosen && saved && saved.bundle !== chosen) await write('pc_set_episode_bundle', { p_id: res.id, p_bundle_id: chosen });
-    const b = bundleOf(episodes.find(x => x.id === res.id));
-    if (payNow && b) {
-      if (priceOf(b)) await write('pc_save_payment', { p_id: null, p_bundle_id: b.id, p_amount: priceOf(b), p_paid_on: f.date.value || today(), p_note: 'תשלום על פרק' }, `נרשם תשלום של ${money(priceOf(b))}`);
-      else toast('לא נרשם תשלום: אין מחיר לפרק בחבילה');
-    }
+    const now = episodes.find(x => x.id === res.id);
+    if (isAdmin() && now && payNow !== paidOf(now)) await setPaid(now.id, payNow, f.date.value);
   };
 }
 const lastMarked = id => [...epsOf(id)].sort((a, b) => (a.at || '').localeCompare(b.at || '')).pop();
@@ -1123,7 +1121,7 @@ async function loadFinance() {
     if (r.ok) {
       const next = { bundles: {}, payments: [], packages: {} };
       r.bundles.forEach(b => next.bundles[b.id] = { price: b.ep_price == null ? null : Number(b.ep_price), start: b.bought_on });
-      next.payments = (r.payments || []).map(x => ({ id: x.id, bundle: x.bundle_id, amount: Number(x.amount), date: x.paid_on, note: x.note, at: x.created_at }));
+      next.payments = (r.payments || []).map(x => ({ id: x.id, bundle: x.bundle_id, ep: x.episode_id || null, amount: Number(x.amount), date: x.paid_on, note: x.note, at: x.created_at }));
       r.packages.forEach(p => next.packages[p.id] = p.episode_price == null ? null : Number(p.episode_price));
       const changed = JSON.stringify(next) !== JSON.stringify(fin);
       fin = next;
@@ -1133,6 +1131,9 @@ async function loadFinance() {
   finLoading = false;
 }
 const leftOf = (b, m) => b.size == null ? m.owed : m.left;
+// A payment made for one episode shows that episode's name
+const payEp = x => { const e = x.ep && episodes.find(y => y.id === x.ep); if (!e) return '';
+  const p = packages.find(y => y.id === e.pkg); return ' · ' + esc(epName(e, p ? epsOf(p.id).indexOf(e) + 1 : 0)); };
 // One package: price, total, paid, left, and its payments
 function moneyCard(b) {
   const m = bMoney(b), pays = paysOf(b.id), left = leftOf(b, m);
@@ -1149,8 +1150,8 @@ function moneyCard(b) {
       <div class="bar paid-bar"><i style="width:${share}%"></i></div>
       <div class="small">${m.total ? share + '% שולם' : 'עוד אין פרקים'}${b.size != null && m.owed ? ` · ${money(m.owed)} מתוכם על פרקים שכבר נעשו` : ''}${m.paid > m.total ? ` · יתרת זכות ${money(m.paid - m.total)}` : ''}</div>`
     : `<div class="small">לחבילה הזו אין מחיר לפרק, לכן אין חישוב של כמה שולם וכמה נשאר. <button class="ghost add" onclick="openBundle('${esc(b.id)}')">הגדרת מחיר</button></div>`}
-    ${pays.length ? `<ul class="pays">${[...pays].reverse().map(x => `<li onclick="if(innerWidth<=520)openPayment('${esc(b.id)}','${esc(x.id)}')"><span class="nw">${fmtDate(x.date)}</span><span class="pn">${esc(x.note)}</span><b>${money(x.amount)}</b>
-      <button class="ghost" onclick="openPayment('${esc(b.id)}','${esc(x.id)}')">עריכה</button><button class="ghost danger" onclick="delPayment('${esc(x.id)}')">מחיקה</button></li>`).join('')}</ul>` : ''}
+    ${pays.length ? `<ul class="pays">${[...pays].reverse().map(x => `<li onclick="if(innerWidth<=520&&${x.amount > 0})openPayment('${esc(b.id)}','${esc(x.id)}')"><span class="nw">${fmtDate(x.date)}</span><span class="pn">${esc(x.note)}${payEp(x)}</span><b>${money(x.amount)}</b>
+      ${x.amount > 0 ? `<button class="ghost" onclick="openPayment('${esc(b.id)}','${esc(x.id)}')">עריכה</button>` : ''}<button class="ghost danger" onclick="delPayment('${esc(x.id)}')">מחיקה</button></li>`).join('')}</ul>` : ''}
   </section>`;
 }
 // Whole project: one row per package and a total row
