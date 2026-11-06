@@ -431,6 +431,18 @@
   .lc-key.off i { background: transparent !important; outline: 1.5px solid var(--faint); }
   @media (prefers-reduced-motion: reduce) { .lc-line.anim, .lc-pop.anim, .lc-fade, .d-arc-in { animation: none; } .lc-pulse { display: none; } }
   @media (prefers-reduced-motion: reduce) { .tip.glide, .tbody, .bar > i, button { transition: none; } }
+  .share-list { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 10px; }
+  .share-list li { border: 1px solid var(--hair); border-radius: 14px; padding: 12px; display: grid; gap: 8px; }
+  .share-list li.fresh { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange) inset; }
+  .sh-top { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+  .sh-url { width: 100%; font-size: 13px; }
+  .share-list .row { flex-wrap: wrap; gap: 6px; }
+  .btn-link { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; color: inherit; text-decoration: none; font-size: 14px; }
+  .btn-link:hover { background: rgba(255,255,255,.08); }
+  .share-new { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--hair); }
+  label.check { display: flex; align-items: center; gap: 8px; font-weight: 400; color: var(--ink); }
+  label.check input { width: auto; margin: 0; }
+  .shared-note span { display: inline-flex; align-items: center; gap: 8px; }
 </style>
 </head>
 <body>
@@ -472,16 +484,27 @@ const I = {
   cal: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
   check: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   lock: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 017 0v2.5"/></svg>',
+  share: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5"/><path d="M5 12.5V18a2.5 2.5 0 002.5 2.5h9A2.5 2.5 0 0019 18v-5.5"/></svg>',
+  eye: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  copy: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M15.5 8.5V6a2.5 2.5 0 00-2.5-2.5H6A2.5 2.5 0 003.5 6v7A2.5 2.5 0 006 15.5h2.5"/></svg>',
   undo: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg>'
 };
-const token = decodeURIComponent(location.hash.slice(1));
+// "#s:<code>" is a view-only link to ONE project (made by the admin with "שיתוף"); anything else is the counter's own token
+const linkRaw = decodeURIComponent(location.hash.slice(1));
+const share = linkRaw.startsWith('s:') ? linkRaw.slice(2) : null;
+const token = share ? '' : linkRaw;
+let shareInfo = { label: '', show_paid: false };
+const showPaid = () => !share || !!shareInfo.show_paid;
 let fin = { bundles: {}, payments: [], packages: {} }, packages = [], episodes = [], categories = [], bundles = [], lastSnap = '', loaded = false, linkError = null, offline = false;
 let view = 'home', selectedId = null;
 const store = {
-  get(k) { try { return localStorage.getItem('pc-' + k); } catch (e) { return null; } },
-  set(k, v) { try { v == null ? localStorage.removeItem('pc-' + k) : localStorage.setItem('pc-' + k, v); } catch (e) {} }
+  // A shared link keeps its own little store, so a code saved on this device never turns it into an editor
+  ns: share ? 'pc-share-' : 'pc-',
+  get(k) { try { return localStorage.getItem(this.ns + k); } catch (e) { return null; } },
+  set(k, v) { try { v == null ? localStorage.removeItem(this.ns + k) : localStorage.setItem(this.ns + k, v); } catch (e) {} }
 };
-selectedId = store.get('selected');
+selectedId = share ? null : store.get('selected');
+if (share) view = 'pkg';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -526,6 +549,7 @@ const catTag = e => { const c = catOf(e); return c ? `<span class="cat-tag" styl
 // Paid status: worked out by the server from the package's payments. Everyone sees it; only the admin switches it
 // (the switch adds or takes back one episode price for that episode).
 function payChip(e) {
+  if (!showPaid()) return '';
   const paid = paidOf(e);
   if (!isAdmin()) return paid ? '' : `<span class="pay-chip">לא שולם</span>`;
   return `<button class="pay-chip ${paid ? 'paid' : ''}" onclick="setPaid('${esc(e.id)}', ${!paid})" title="${paid ? 'סימון כלא שולם' : 'סימון כשולם'}">${paid ? 'שולם' : 'לא שולם'}</button>`;
@@ -559,11 +583,11 @@ const sizeText = b => b.size == null ? 'חבילה פתוחה' : b.size === 1 ? 
 const epName = (e, n) => e.title || (e.guest ? 'פרק עם ' + e.guest : 'פרק ' + n);
 let selBundle = null;  // inside a project: null = whole project, a package id, or 'out' (episodes outside the packages)
 function select(id) { if (id !== selectedId) selBundle = null; selectedId = id; store.set('selected', id); }
-const isAdmin = () => !!store.get('pin') && store.get('role') === 'admin';
+const isAdmin = () => !share && !!store.get('pin') && store.get('role') === 'admin';
 // Non-admins may change or undo an episode only within 10 minutes of marking it (the server enforces this too)
 const UNDO_MS = 10 * 60 * 1000;
 const recent = e => e && e.at && Date.now() - Date.parse(e.at) < UNDO_MS;
-const canChange = e => isAdmin() || recent(e);
+const canChange = e => !share && (isAdmin() || recent(e));
 
 function toast(text) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = text;
@@ -582,9 +606,10 @@ async function rpc(fn, args) {
   return body;
 }
 async function load() {
-  if (!token) { linkError = 'missing'; return render(); }
+  if (!token && !share) { linkError = 'missing'; return render(); }
   try {
-    const s = await rpc('pc_state', { p_token: token });
+    const s = share ? await rpc('pc_share_state', { p_share: share }) : await rpc('pc_state', { p_token: token });
+    if (share) { shareInfo = s.share || shareInfo; if (s.packages[0]) selectedId = s.packages[0].id; }
     packages = s.packages.map(p => ({ ...p, guests: p.guests || [] }));
     categories = s.categories || [];
     bundles = (s.bundles || []).map(b => ({ id: b.id, pkg: b.package_id, size: b.size, note: b.note, at: b.created_at, paidEps: b.paid_eps || 0 }));
@@ -651,7 +676,7 @@ async function write(fn, args, okText) {
 // ---------- rendering ----------
 function renderWho() {
   const b = $('whoBtn'), pin = store.get('pin');
-  b.hidden = !loaded;
+  b.hidden = !loaded || !!share;
   b.classList.toggle('in', !!pin);
   b.innerHTML = !pin ? `${I.lock}כניסה עם קוד`
     : esc(`${isAdmin() ? 'מחובר כמנהל' : 'מחובר לעריכה'}${store.get('who') ? ' · ' + store.get('who') : ''} · יציאה`);
@@ -665,8 +690,9 @@ function render() {
   $('newPkgBtn').hidden = !!linkError || !loaded || !isAdmin();
   renderWho();
   $('calBtn').classList.toggle('active', view === 'calendar');
+  $('calBtn').hidden = !!share;
   const st = $('status');
-  st.textContent = linkError ? 'קישור לא תקין' : offline ? 'אין חיבור' : loaded ? '● משותף' : 'מתחבר...';
+  st.textContent = linkError ? 'קישור לא תקין' : offline ? 'אין חיבור' : loaded ? (share ? '● מתעדכן' : '● משותף') : 'מתחבר...';
   st.className = 'status' + (loaded && !offline && !linkError ? ' live' : '');
 
   // Side panel: all projects on the home and month screens; inside a project, only that project's packages
@@ -684,17 +710,20 @@ function render() {
 
   const main = $('main');
   if (linkError) {
-    main.innerHTML = `<div class="empty"><h3>${linkError === 'missing' ? 'חסר חלק בקישור' : 'הקישור לא תקין'}</h3>
+    main.innerHTML = share ? `<div class="empty"><h3>הקישור הזה לא פעיל</h3>
+      <div>ייתכן שהקישור נסגר או שהוא לא הועתק עד הסוף. אפשר לבקש קישור חדש.</div></div>`
+      : `<div class="empty"><h3>${linkError === 'missing' ? 'חסר חלק בקישור' : 'הקישור לא תקין'}</h3>
       <div>פתח את הקישור המלא שקיבלת. הוא נגמר בסימן # ואחריו רצף של אותיות ומספרים.</div></div>`;
     return;
   }
   if (!loaded) { main.innerHTML = `<div class="empty">${offline ? 'אין חיבור לשרת. מנסה שוב...' : 'טוען את הנתונים...'}</div>`; return; }
   renderRail();
+  if (share) view = 'pkg';
   if (view === 'calendar') return renderMonth(main);
   if (view === 'home') return renderHome(main);
   if (!current() && packages.length) select(packages[0].id);
   const p = current();
-  if (!p) { view = 'home'; return render(); }
+  if (!p) { if (share) { main.innerHTML = '<div class="empty">אין מה להציג כרגע.</div>'; return; } view = 'home'; return render(); }
 
   // What this screen shows: the whole project, one package, or episodes without a package
   const { secs, rest, eps } = sections(p);
@@ -711,14 +740,14 @@ function render() {
   const local = scope === 'bundle';
   const dots = Array.from({ length: open ? done : Math.max(cap, done) }, (_, j) => {
     const x = items[j];
-    return x ? `<div class="dot on ${paidOf(x.e) ? '' : 'unpaid'}" data-i="${x.i}" tabindex="0" style="${catVars(colorOf(x.e))}">${local ? j + 1 : x.i + 1}</div>`
+    return x ? `<div class="dot on ${paidOf(x.e) || !showPaid() ? '' : 'unpaid'}" data-i="${x.i}" tabindex="0" style="${catVars(colorOf(x.e))}">${local ? j + 1 : x.i + 1}</div>`
              : `<div class="dot">${j + 1}</div>`;
   }).join('');
   const usedCats = catsOf(p.id).map(c => ({ c, n: items.filter(x => x.e.cat === c.id).length })).filter(x => x.n);
   const noCat = items.filter(x => !catOf(x.e)).length;
   const legend = catsOf(p.id).length && done ? `<div class="legend">${usedCats.map(x =>
       `<span><i style="background:${x.c.color}"></i>${esc(x.c.name)} <b>${x.n}</b></span>`).join('')}${noCat ? `<span><i class="none"></i>ללא שיוך <b>${noCat}</b></span>` : ''}</div>` : '';
-  const payLegend = done ? `<div class="legend pay-legend"><span><i class="sq"></i>שולם <b>${paidN}</b></span><span><i class="sq hollow"></i>לא שולם <b>${unpaidN}</b></span>${over ? `<span>מעבר לחבילה <b>${over}</b></span>` : ''}</div>` : '';
+  const payLegend = done && showPaid() ? `<div class="legend pay-legend"><span><i class="sq"></i>שולם <b>${paidN}</b></span><span><i class="sq hollow"></i>לא שולם <b>${unpaidN}</b></span>${over ? `<span>מעבר לחבילה <b>${over}</b></span>` : ''}</div>` : '';
 
   const row = ({ e, i }) => `
     <li>
@@ -730,13 +759,13 @@ function render() {
         ${e.note ? `<div class="note">${esc(e.note)}</div>` : ''}
       </div>
       <div class="row ep-actions">
-        <a class="cal-link" href="${calUrl(p, e, i + 1)}" target="_blank" rel="noopener">${I.cal}הוסף ליומן</a>
+        ${share ? '' : `<a class="cal-link" href="${calUrl(p, e, i + 1)}" target="_blank" rel="noopener">${I.cal}הוסף ליומן</a>`}
         ${canChange(e) ? `<button class="ghost" onclick="openEp('${esc(e.id)}')">עריכה</button>
         <button class="ghost danger" onclick="delEp('${esc(e.id)}')">מחיקה</button>` : ''}
       </div>
     </li>`;
   const newestFirst = list => [...list].reverse().map(row).join('');
-  const grpChip = list => { const n = list.filter(x => paidOf(x.e)).length;
+  const grpChip = list => { if (!showPaid()) return ''; const n = list.filter(x => paidOf(x.e)).length;
     return n === list.length ? '<span class="pay-chip paid">שולם</span>' : `<span class="pay-chip">שולם ${n} מתוך ${list.length}</span>`; };
   // Whole project: newest package first, its episodes newest first, under a heading per package
   const list = scope !== 'all' || !secs.length ? newestFirst(items)
@@ -751,7 +780,7 @@ function render() {
     : `${secs.length === 1 ? 'חבילה אחת' : secs.length + ' חבילות'}${cap ? ` · ${cap} פרקים` : ''}${p.note ? ' · ' + esc(p.note) : ''}`;
   const actions = !isAdmin() ? '' : scope === 'bundle'
     ? `<div class="row head-actions"><button onclick="openBundle('${esc(sec.b.id)}')">עריכת חבילה</button><button class="ghost danger" onclick="delBundle('${esc(sec.b.id)}')">מחיקה</button></div>`
-    : scope === 'all' ? `<div class="row head-actions"><button onclick="openBundle()">+ חבילה</button><button onclick="openCats()">שיוכים</button><button onclick="openPkg('${esc(p.id)}')">עריכת פרויקט</button>
+    : scope === 'all' ? `<div class="row head-actions"><button class="primary" onclick="openShares('${esc(p.id)}')">${I.share}שיתוף</button><button onclick="openBundle()">+ חבילה</button><button onclick="openCats()">שיוכים</button><button onclick="openPkg('${esc(p.id)}')">עריכת פרויקט</button>
         <button class="ghost danger" onclick="delPkg()">מחיקה</button></div>` : '';
   const moneyHtml = !isAdmin() ? '' : scope === 'bundle' ? moneyCard(sec.b) : scope === 'all' ? moneyTable(p) : '';
 
@@ -764,12 +793,14 @@ function render() {
       </div>
       ${actions}
     </div>
-    ${store.get('pin') ? '' : `<div class="view-only"><span>מצב צפייה. כדי לסמן פרקים צריך קוד.</span>
+    ${share ? `<div class="view-only shared-note"><span>${I.eye}קישור צפייה${shareInfo.label ? ' · ' + esc(shareInfo.label) : ''}. המונה מתעדכן לבד בכל פעם שנגמר פרק.</span></div>`
+      : store.get('pin') ? '' : `<div class="view-only"><span>מצב צפייה. כדי לסמן פרקים צריך קוד.</span>
       <button onclick="askPin(false)">${I.lock}הקלדת קוד</button></div>`}
     <div class="stats">
       ${open ? `<div class="stat done"><b>${done}</b><span>פרקים</span></div>
-      <div class="stat"><b>${paidN}</b><span>שולמו</span></div>
-      <div class="stat"><b>${unpaidN}</b><span>לא שולמו</span></div>`
+      ${showPaid() ? `<div class="stat"><b>${paidN}</b><span>שולמו</span></div>
+      <div class="stat"><b>${unpaidN}</b><span>לא שולמו</span></div>` : `<div class="stat"><b>${secs.length}</b><span>${secs.length === 1 ? 'חבילה' : 'חבילות'}</span></div>
+      <div class="stat"><b>${fmtDate(lastDate(items)) || '—'}</b><span>פרק אחרון</span></div>`}`
       : `<div class="stat done"><b>${done}</b><span>נגמרו</span></div>
       <div class="stat"><b>${left}</b><span>נשארו</span></div>
       <div class="stat"><b>${pctHere}%</b><span>הושלם</span></div>`}
@@ -779,9 +810,9 @@ function render() {
     ${payLegend}
     ${legend}
     ${!open && done >= cap ? `<div class="complete">${I.check}${scope === 'bundle' ? 'החבילה מלאה' : 'כל החבילות נוצלו'}${over ? ` · ${over === 1 ? 'פרק אחד' : over + ' פרקים'} מעבר` : ''}</div>` : ''}
-    <div class="row action-bar">
+    ${share ? '' : `<div class="row action-bar">
       <button class="primary big" onclick="openEp()">${I.check}סיימתי פרק</button>
-      <button onclick="undoLast()" ${canChange(lastMarked(p.id)) ? '' : 'disabled'}>${I.undo}ביטול אחרון</button></div>
+      <button onclick="undoLast()" ${canChange(lastMarked(p.id)) ? '' : 'disabled'}>${I.undo}ביטול אחרון</button></div>`}
     ${moneyHtml}
     <h2>${scope === 'bundle' ? 'הפרקים בחבילה' : scope === 'out' ? 'פרקים בלי חבילה' : 'פרקים שנגמרו'}</h2>
     ${done ? `<ul class="eps">${list}</ul>` : '<div class="small">עוד לא סומן אף פרק.</div>'}
@@ -816,7 +847,7 @@ function showTip(i, cell) {
   lines.className = 'tlines';
   lines.innerHTML = `<span class="tp">${esc(epName(e, n))}</span>
     ${catOf(e) ? `<span class="ts"><i class="tdot" style="background:${colorOf(e)}"></i>${esc(catOf(e).name)}</span>` : ''}
-    <span class="ts">${!isOpen(p) ? `פרק ${n} מתוך ${capOf(p)}` : `פרק ${n}`} · ${fmtDate(e.date)} · ${paidOf(e) ? 'שולם' : 'לא שולם'}</span>
+    <span class="ts">${!isOpen(p) ? `פרק ${n} מתוך ${capOf(p)}` : `פרק ${n}`} · ${fmtDate(e.date)}${showPaid() ? ' · ' + (paidOf(e) ? 'שולם' : 'לא שולם') : ''}</span>
     ${e.by ? `<span class="ts">סימן: ${esc(e.by)} · ${fmtWhen(e.at)}</span>` : ''}
     ${e.note ? `<span class="tn">${esc(e.note)}</span>` : ''}`;
   body.appendChild(lines);
@@ -1041,6 +1072,7 @@ function openEp(id) {
     if (isAdmin() && now && payNow !== paidOf(now)) await setPaid(now.id, payNow, f.date.value);
   };
 }
+const lastDate = items => items.map(x => x.e.date).filter(Boolean).sort().pop() || '';
 const lastMarked = id => [...epsOf(id)].sort((a, b) => (a.at || '').localeCompare(b.at || '')).pop();
 async function undoLast() {
   const last = lastMarked(current().id);
@@ -1095,6 +1127,60 @@ async function delCat(id) {
   const n = episodes.filter(e => e.cat === id).length;
   if (!await ask(`למחוק את השיוך "${c.name}"?${n ? ` ${n} פרקים יישארו בלי שיוך.` : ''}`, 'מחיקה')) return openCats();
   if (await write('pc_delete_category', { p_id: id }, 'השיוך נמחק')) openCats();
+}
+
+// ---------- share links (admin): a view-only link to ONE project ----------
+// The server sends that link only this project, without money, notes, guest emails or who marked.
+const shareUrl = t => location.origin + location.pathname + '#s:' + t;
+async function adminCall(fn, args) {
+  const pin = await getPin(); if (!pin) return null;
+  try { return await rpc(fn, { p_token: token, p_pin: pin, ...args }); } catch (e) { return { ok: false, error: e.code }; }
+}
+async function openShares(pid, fresh) {
+  const p = packages.find(x => x.id === pid); if (!p) return;
+  openModal(`<h3>שיתוף · ${esc(p.client)}</h3><div class="small" style="margin-top:6px">טוען...</div>`);
+  const r = await adminCall('pc_shares', { p_package_id: pid });
+  if (!r) return closeModal();
+  if (!r.ok) { closeModal(); return toast(r.error === 'admin_only' ? 'רק המנהל יכול לשתף.' : 'אין חיבור לשרת. נסה שוב.'); }
+  const list = r.shares || [];
+  openModal(`<h3>שיתוף · ${esc(p.client)}</h3>
+    <div class="small" style="margin-top:6px">מי שמקבל קישור רואה <b>רק את הפרויקט הזה</b>: כמה פרקים נעשו, החבילות וכמה נשאר, ורשימת הפרקים. הוא לא רואה פרויקטים אחרים, כספים, הערות או מי סימן, ולא יכול לשנות כלום.</div>
+    ${list.length ? `<ul class="share-list">${list.map(x => `<li class="${x.id === fresh ? 'fresh' : ''}">
+      <div class="sh-top"><b>${esc(x.label || 'קישור בלי שם')}</b><span class="small">${x.show_paid ? 'מציג מה שולם' : 'בלי מצב תשלום'} · נוצר ${fmtDate((x.created_at || '').slice(0, 10))}</span></div>
+      <input class="sh-url" readonly dir="ltr" value="${esc(shareUrl(x.token))}" onclick="this.select()">
+      <div class="row">
+        <button class="primary" onclick="copyShare('${esc(x.token)}')">${I.copy}העתקה</button>
+        ${navigator.share ? `<button onclick="sendShare('${esc(x.token)}', '${esc(p.client).replace(/'/g, '&#39;')}')">${I.share}שליחה</button>` : ''}
+        <a class="btn-link" href="${esc(shareUrl(x.token))}" target="_blank" rel="noopener">${I.eye}איך זה נראה</a>
+        <button class="ghost danger" onclick="delShare('${esc(pid)}', '${esc(x.id)}')">סגירת הקישור</button>
+      </div></li>`).join('')}</ul>` : '<div class="small" style="margin-top:14px">עוד אין קישורים לפרויקט הזה.</div>'}
+    <form id="shareForm" class="share-new">
+      <label for="f-sh-label">קישור חדש · למי? (לא חובה)</label>
+      <input id="f-sh-label" name="label" maxlength="60" placeholder="למשל: אופק">
+      <label class="check"><input type="checkbox" name="paid" checked> להציג מה שולם ומה לא (בלי סכומים)</label>
+      <div class="actions"><button class="primary">יצירת קישור</button><button type="button" onclick="closeModal()">סגירה</button></div>
+    </form>`);
+  $('shareForm').onsubmit = async ev => {
+    ev.preventDefault();
+    const f = ev.target, res = await adminCall('pc_save_share', { p_id: null, p_package_id: pid, p_label: f.label.value.trim(), p_show_paid: f.paid.checked });
+    if (!res) return;
+    if (!res.ok) return toast('יצירת הקישור לא הצליחה. נסה שוב.');
+    toast('הקישור מוכן');
+    openShares(pid, res.id);
+  };
+}
+async function copyShare(t) {
+  try { await navigator.clipboard.writeText(shareUrl(t)); toast('הקישור הועתק'); }
+  catch (e) { toast('לא הצלחתי להעתיק. אפשר לסמן את הקישור ולהעתיק ידנית.'); }
+}
+async function sendShare(t, name) {
+  try { await navigator.share({ title: 'talks. · ' + name, text: `המונה של ${name} ב-talks.: כמה פרקים נעשו וכמה נשארו`, url: shareUrl(t) }); } catch (e) {}
+}
+async function delShare(pid, id) {
+  if (!await ask('לסגור את הקישור? מי שקיבל אותו לא יוכל לפתוח אותו יותר.', 'סגירת הקישור')) return openShares(pid);
+  const r = await adminCall('pc_delete_share', { p_id: id });
+  if (r && r.ok) toast('הקישור נסגר'); else if (r) toast('הסגירה לא הצליחה. נסה שוב.');
+  openShares(pid);
 }
 
 // ---------- money (admin only; prices and payments come from pc_finance, never from the shared state) ----------
@@ -1409,13 +1495,13 @@ function sideBundles(p) {
       ${pctv == null ? '' : `<div class="mini-bar"><i style="width:${pctv}%"></i></div>`}</button>`;
   const moneyLine = b => { if (!isAdmin() || !priceOf(b)) return ''; const m = bMoney(b), l = leftOf(b, m);
     return l ? ` · נשאר ${money(l)}` : m.paid ? ' · שולם' : ''; };
-  const badge = s => { const n = s.items.filter(x => paidOf(x.e)).length;
+  const badge = s => { if (!showPaid()) return ''; const n = s.items.filter(x => paidOf(x.e)).length;
     return s.items.length && n === s.items.length ? '<span class="badge">שולם</span>' : ''; };
   return item('', !selBundle, 'כל הפרויקט', `${eps.length === 1 ? 'פרק אחד' : eps.length + ' פרקים'}${secs.length ? ` · ${secs.length === 1 ? 'חבילה אחת' : secs.length + ' חבילות'}` : ''}`, null)
     + secs.map(s => item(s.key, selBundle === s.key, `${esc(bName(s.b, s.k))}${badge(s)}`,
         `${s.size == null ? `${s.items.length} פרקים · פתוחה` : `${s.items.length} / ${s.size}`}${moneyLine(s.b)}`,
         s.size == null ? null : Math.min(100, Math.round(s.items.length / s.size * 100)))).join('')
-    + (rest.length ? item('out', selBundle === 'out', 'בלי חבילה', `${rest.length} · שולם ${rest.filter(x => paidOf(x.e)).length}`, null) : '')
+    + (rest.length ? item('out', selBundle === 'out', 'בלי חבילה', `${rest.length}${showPaid() ? ` · שולם ${rest.filter(x => paidOf(x.e)).length}` : ''}`, null) : '')
     + (isAdmin() ? '<button class="ghost side-add" onclick="openBundle()">+ הוספת חבילה</button>' : '');
 }
 
@@ -1507,7 +1593,7 @@ $('pkgList').addEventListener('click', ev => {
   view = 'pkg'; select(b.dataset.id); render();
 });
 $('newPkgBtn').onclick = () => openPkg();
-$('logoBtn').onclick = () => { view = 'home'; render(); window.scrollTo(0, 0); };
+$('logoBtn').onclick = () => { if (share) selBundle = null; else view = 'home'; render(); window.scrollTo(0, 0); };
 $('calBtn').onclick = () => { view = view === 'calendar' ? 'pkg' : 'calendar'; render(); };
 window.addEventListener('hashchange', () => location.reload());
 setInterval(() => { if (loaded && !$('modalRoot').innerHTML) render(); }, 60000);
